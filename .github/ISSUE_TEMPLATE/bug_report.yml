@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible build or gameplay defect
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use the supported XBE and read docs/KNOWN_ISSUES.md first.
+        Do not attach game files, disc images, executables/PDB, generated code, saves, memory dumps, texture packs or full F3 captures.
+        Read and sanitize logs before posting: remove personal paths, usernames and IP addresses.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Revision and environment
+      description: Source revision, XBE SHA-1 (hash only), Windows, CPU, RAM, GPU and driver. Include tool versions for build failures.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Arena, characters, mode, action, expected result and actual result.
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: Settings and mods
+      description: Relevant settings, mods, and whether the defect persists without mods.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Sanitized log or build error
+      description: Copy the log after closing the game and before restarting. Review its contents before posting; do not attach dumps or game data.

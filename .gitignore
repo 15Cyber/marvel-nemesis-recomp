@@ -1,0 +1,74 @@
+# build
+/out/
+/build/
+*.zip
+*.pdb
+*.exe
+*.obj
+*.o
+
+# recompiled code, derived from the game
+/generated/
+
+# user's own game files
+/assets/
+
+# runtime files
+settings.toml
+/logs/
+/captures/
+/hdd/
+/hdd[0-9]*/
+/saves/
+/saves[0-9]*/
+/mods/
+/.saves*-migration-*/
+/CrashDumps/
+
+# editors
+.vs/
+.vscode/
+.idea/
+
+# Local temporary folder
+.local
+
+# private chat attachments and working material
+/.codex-remote-attachments/
+/arquivos_claude/
+
+# game binaries, textures and captured frames (including accidental copies)
+*.xbe
+*.xpr
+*.dds
+*.iso
+*.bmp
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.tga
+*.nod
+*.nil
+*.nsd
+*.nms
+*.nad
+*.nsa
+*.apt
+*.vp6
+*.bik
+*.wav
+*.ogg
+*.mp3
+*.wma
+*.xwb
+*.xsb
+*.xbx
+*.7z
+*.rar
+*.bin
+*.cue
+*.nsc
+*.not
+*.nvb
+*.big

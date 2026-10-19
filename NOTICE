@@ -1,0 +1,30 @@
+Marvel Nemesis recomp — source-only alpha candidate
+
+This is an unofficial project, not affiliated with or endorsed by Marvel,
+Electronic Arts, Microsoft, or the original developers. Game names and
+trademarks belong to their respective owners. No game assets, original or
+recompiled game executables, or community texture packs are included.
+
+The port is built on TGP482/XboxXBERecomp (MIT; sdk/LICENSE).
+The bundled SDK has local modifications for this game and is not an
+unmodified upstream release. Source provenance is recorded privately by
+the maintainer; the development repository/history is not bundled here.
+
+SMAA shader and generic lookup tables: iryoku/smaa, via the SCDA-XBERecomp
+packaging at e8f8b443e97cc89c8b1f009df5b6b66e50a771ee.
+GTAO integration includes code adapted from that SCDA revision.
+Full notices are retained in the corresponding headers and docs/licenses/.
+
+Build dependencies: Zydis and Zycore (MIT), toml++ (MIT), Dear ImGui (MIT),
+and SDL (zlib). Full license texts are in docs/licenses/ and
+sdk/THIRD_PARTY.txt. These dependencies are fetched by CMake; their source
+trees and compiled binaries are not redistributed in this candidate.
+
+XboxXBERecomp also credits XenonRecomp, xemu and Cxbx-Reloaded as technical
+references; see sdk/README.md. Original game data and trademarks are not
+licensed by the software licenses supplied with this source repository.
+
+Project-owned additions: Copyright (c) 2026 15Cyber, MIT License (LICENSE).
+Existing third-party copyright lines and licenses remain applicable to their
+respective files; this notice does not replace them. This source candidate
+still awaits clean-build validation and the maintainer's publication approval.
