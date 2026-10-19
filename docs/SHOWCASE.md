@@ -32,6 +32,6 @@ The captures show different moments, including animation/HUD differences. Exact 
 
 ## Video walkthrough
 
-[Watch the PC port showcase on YouTube](https://youtu.be/LgDM9how-TY), covering menus and gameplay. The maintainer scheduled the premiere for **October 19, 2026 at 20:30 Brasília time (UTC−3)**.
+**Available now:** [Watch the PC port showcase on YouTube](https://youtu.be/LgDM9how-TY), covering menus and gameplay.
 
 Future comparison captures should identify resolution/render scale, antialiasing, AO, shadow resolution/softness and mods. The goal is to show the port's changes without implying that original assets have been remastered or that an unmeasured feature has no performance cost.
