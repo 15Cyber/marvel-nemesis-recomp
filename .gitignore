@@ -72,3 +72,11 @@ settings.toml
 *.not
 *.nvb
 *.big
+
+# Maintainer-supplied documentation captures only; game resources stay ignored.
+!/docs/screenshots/gameplay-streets.png
+!/docs/screenshots/pc-settings.png
+!/docs/screenshots/options-menu.png
+!/docs/screenshots/title-screen.png
+!/docs/screenshots/graphics-before.png
+!/docs/screenshots/graphics-after.png

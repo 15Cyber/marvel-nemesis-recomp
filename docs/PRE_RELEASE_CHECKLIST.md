@@ -4,7 +4,7 @@
 
 - [x] Separate source candidate; original development repository/checkpoints preserved.
 - [x] Source taken from stable checkpoint, without its Git history or local author identity.
-- [x] No game assets, generated code, executable/PDB, saves, mods, captures or private handoffs copied.
+- [x] No usable game assets, generated code, executable/PDB, saves, mods, runtime capture packages or private handoffs copied. Six explicitly allowed maintainer-supplied screenshots illustrate the documentation; see SHOWCASE.md.
 - [x] Public README, usage, limitations, reporting template and source-only distribution policy.
 - [x] Required XBE hash documented and checked by build script before compilation.
 - [x] Bundled SDK required; no fallback download of a different SDK.
