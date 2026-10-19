@@ -10,7 +10,7 @@ The keyboard and a controller can both drive player 1; a second controller can d
 
 Game data is stored beside the executable under `saves/E/UDATA/4541038a/`. First startup can copy an old `hdd/E` into `saves/E`; the legacy directory is retained, and populated saves are not merged or overwritten. Close the game before backing up or moving saves. PC settings remain in the separate `settings.toml`.
 
-Migration and loading an existing migrated save were validated. A separate new-save/reopen test after migration is still pending individual confirmation.
+Migration and loading an existing migrated save were validated in development. The fresh-folder public build also passed a user-reported manual save/close/reopen/load cycle using its new portable save directory. That second check did not repeat a legacy migration.
 
 ## File mods
 

@@ -2,6 +2,8 @@
 
 ## Confirmed coverage
 
+- Public source candidate compiled successfully in a fresh folder on the maintainer's PC on 19 October 2026. The user subsequently approved the tested gameplay and a manual save/close/reopen/load cycle. Logs confirm normal shutdown in both supplied runtime sessions. See [Validation](VALIDATION.md).
+
 - Development testing on one Windows 11 system with an NVIDIA RTX 5060 Ti, Ryzen 5 5600 and 32 GB RAM.
 - Original and PC menus, multiple Versus arenas/characters, local two-player input, keyboard remapping/coexistence, graphics options and focus pause exercised by the tester.
 - Thing, Wolverine and Elektra campaign missions visited through Development, without full objective/completion coverage.
@@ -11,9 +13,9 @@
 
 ## Pending checks
 
-- A fresh build of this public source candidate, on a clean folder and preferably a second PC.
+- Build and gameplay on a second PC; broader coverage beyond the maintainer's smoke checks.
 - AMD/Intel GPUs, Windows 10, broader campaign and device hot-plug coverage.
-- New save/reopen after portable-save migration; autosave restoration after normal Load/reset.
+- Autosave restoration after normal campaign Load/reset following a Development session. The public fresh-folder save test did not establish this separate behavior.
 - Mods applied over an ISO and additional resource/campaign bundle paths.
 - Every pause-menu/cancellation path, individual movie scale modes and all cheat failure conditions.
 - Object distance visual comparisons and effect costs without a frame-rate limiter. Capped screenshots do not establish performance headroom.

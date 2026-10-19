@@ -1,6 +1,6 @@
 # Marvel Nemesis: Rise of the Imperfects — Xbox recomp
 
-**Alpha source candidate. Clean-build validation is still pending.**
+**Alpha source candidate. Fresh-folder build, gameplay smoke checks and a save/close/reopen/load cycle were approved on the maintainer's PC. Coverage is limited; see [Validation](docs/VALIDATION.md).**
 
 An unofficial Windows PC port of the original Xbox game, built with [TGP482/XboxXBERecomp](https://github.com/TGP482/XboxXBERecomp). This project is not affiliated with, endorsed by, or sponsored by Marvel, Electronic Arts, Microsoft, or the original developers. Game names and trademarks belong to their respective owners.
 
@@ -14,7 +14,7 @@ Only an original Xbox `default.xbe` with SHA-1 **`66481feb81d9a00a63f0d2f0a203a2
 
 1. Read [Building](docs/BUILDING.md). Install Visual Studio with Desktop development with C++, Clang/LLVM, CMake, Ninja, a Windows SDK and Git.
 2. Place your extracted game files in `assets/`, with `default.xbe` directly inside it.
-3. Run `build.bat`. Dependencies are fetched on the first configuration; Internet access is required. Build duration has not been benchmarked on a clean machine.
+3. Run `build.bat`. Dependencies are fetched on the first configuration; Internet access is required. Total first-build duration has not been measured; the successful local fresh-folder build is recorded in [Validation](docs/VALIDATION.md).
 4. The locally built game is `out/build/release/MarvelNemesis.exe`.
 
 Keep the bundled `sdk/`: it contains local compatibility changes. Do not run SDK Sync or substitute an upstream SDK.
