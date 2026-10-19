@@ -20,6 +20,6 @@
 - [x] User approved the tested gameplay and manual save/close/reopen/load cycle in this clean build; runtime logs confirm initialization and normal shutdown. Individual coverage limits are in VALIDATION.md.
 - [x] No defect reported in this smoke round; broader unresolved cases remain visible in KNOWN_ISSUES.md.
 - [x] Source inventory and source archive checked after documentation updates; private archives are never release packages. Repeat this check if sources change again.
-- [ ] Maintainer explicitly approves publication and chooses the public repository/tag. No upload has been authorized by preparing these files.
+- [x] Maintainer explicitly authorized publication of this source-only alpha to `15Cyber/marvel-nemesis-recomp`.
 
 Optional broader coverage: another machine, AMD/Intel GPUs, ISO mods, autosave Load/reset, remaining missions/arenas. Report coverage honestly rather than marking unperformed tests as passed.
