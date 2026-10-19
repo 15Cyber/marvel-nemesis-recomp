@@ -32,6 +32,6 @@ The captures show different moments, including animation/HUD differences. Exact 
 
 ## Video walkthrough
 
-The maintainer plans to publish a YouTube walkthrough covering menus and gameplay. Its real link will be added when available; no placeholder download or invented video URL is provided.
+[Watch the PC port showcase on YouTube](https://youtu.be/LgDM9how-TY), covering menus and gameplay. The maintainer scheduled the premiere for **October 19, 2026 at 20:30 Brasília time (UTC−3)**.
 
 Future comparison captures should identify resolution/render scale, antialiasing, AO, shadow resolution/softness and mods. The goal is to show the port's changes without implying that original assets have been remastered or that an unmeasured feature has no performance cost.

@@ -32,7 +32,7 @@ Return to the campaign and local Versus with cleaner edges, configurable shadows
 
 </details>
 
-**Gameplay and menu video:** a YouTube walkthrough is planned. The link will be added here when the maintainer publishes it.
+**Gameplay and menu video:** [Watch the PC port showcase on YouTube](https://youtu.be/LgDM9how-TY), featuring menus and gameplay. Scheduled to premiere on **October 19, 2026 at 20:30 Brasília time (UTC−3)**.
 
 ### Graphics, before and after
 
