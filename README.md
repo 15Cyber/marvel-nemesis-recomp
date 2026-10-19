@@ -8,6 +8,8 @@ Return to the campaign and local Versus with cleaner edges, configurable shadows
 
 **Status: alpha · Windows x64 · Direct3D 12 · source-only distribution.** Fresh-folder build, tested gameplay and save/close/reopen/load have been approved on the maintainer's PC. This is an evolving community project, not a claim of complete compatibility. See [Validation](docs/VALIDATION.md) and [known limitations](docs/KNOWN_ISSUES.md).
 
+**AI-assisted development:** maintained by **15Cyber**, with assistance from **OpenAI Codex** and **Anthropic Claude** during research, implementation, debugging and documentation. Project direction, hands-on gameplay testing and approval of changes are handled by the maintainer.
+
 > **Bring your own game. We do not support piracy.**
 > You must provide files from your own legally acquired, supported original Xbox copy. This repository does not provide the game, disc images, original/recompiled game executables, generated game code or downloadable texture packs. Do not request or share pirated copies, game-download links or copyrighted game resources in issues or pull requests. The images below are gameplay captures supplied by the maintainer for documentation, not usable game resources.
 
