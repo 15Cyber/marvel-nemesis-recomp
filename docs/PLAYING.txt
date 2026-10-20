@@ -1,0 +1,34 @@
+Marvel Nemesis: Rise of the Imperfects - Windows x64 alpha
+
+1. Extract the ENTIRE ZIP to a writable folder. Keep compiler/ beside MarvelNemesis.exe.
+2. Put your own supported original Xbox game in assets/: either the extracted
+   files (default.xbe and all game directories), or your own disc image (.iso).
+3. Run MarvelNemesis.exe. On first launch a preparation window translates and
+   compiles your game's code locally. No Visual Studio installation is needed.
+   This can take several minutes and needs memory and disk space. Wait for it
+   to finish. The game starts automatically. Completed files are kept if you cancel.
+4. Later launches reuse MarvelNemesis.dll. Keep compiler/ for repair and updates.
+
+Supported default.xbe SHA-1: 66481feb81d9a00a63f0d2f0a203a297b712cfb5
+Unsupported revisions are rejected before preparation. No game data or prepared
+game-code DLL is included. We do not support piracy.
+
+Requirements: Windows x64, an x86-64-v2 capable CPU, Direct3D 12 capable GPU.
+Tested hardware coverage and limitations:
+https://github.com/15Cyber/marvel-nemesis-recomp/blob/main/docs/KNOWN_ISSUES.md
+
+PC Settings: Options > PC Settings, or F10. Local saves live in saves/ beside
+the executable. Back up existing saves separately before updating. Extract
+updates into a fresh folder; transfer your game files and saves deliberately.
+Developer sessions suppress autosave, but manual saves still affect progress.
+Experimental mods go in mods/ using compatible Xbox paths and formats.
+
+Preparation diagnostics: logs/compile.log and logs/marvelnemesis.log.
+For support, provide sanitized log excerpts, hardware and reproduction steps.
+Do not attach game files, prepared DLLs, compiler/work, saves or memory dumps.
+
+Project: https://github.com/15Cyber/marvel-nemesis-recomp
+Built with TGP482/XboxXBERecomp; first-launch preparation adapted from
+TGP482/SCDA-XBERecomp (MIT). Maintained by 15Cyber with Codex/Claude assistance.
+Unofficial fan project, not affiliated with Marvel, EA, Microsoft or original developers.
+See LICENSE, NOTICE, sdk/THIRD_PARTY.txt and docs/licenses for software notices.

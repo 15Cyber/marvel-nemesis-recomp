@@ -237,7 +237,7 @@ bool CodeGen::Run() {
     for (uint32_t f : absent) shared += F("X86_EXTERN_FUNC(%s);\n", FuncName(f).c_str());
     std::map<std::string, bool> hooks;
     for (auto& [va, h] : an_.cfg.hooks) hooks.emplace(h.call, h.Returns());
-    for (auto& [name, returns] : hooks) shared += F("%s %s(X86Context& ctx, uint8_t* base);\n", returns ? "bool" : "void", name.c_str());
+    for (auto& [name, returns] : hooks) shared += F("X86_HOST_API %s %s(X86Context& ctx, uint8_t* base);\n", returns ? "bool" : "void", name.c_str());
     WriteIfChanged(out_ / "x86_recomp_shared.h", shared);
 
     // partition by instruction count so the files compile in similar time
@@ -287,6 +287,24 @@ bool CodeGen::Run() {
         map += F("X86_WEAK_FUNC(%s, __imp__%s)\n", FuncName(f).c_str(), FuncName(f).c_str());
     }
     WriteIfChanged(out_ / "x86_func_mapping.cpp", map);
+
+    // SCDA's separate-code layout: the import library contains names, never game instructions.
+    if (!an_.cfg.library.empty()) {
+        std::string library = F("LIBRARY %s\nEXPORTS\n", an_.cfg.library.c_str());
+        std::string exports, aliases;
+        for (const char* table : {"X86FuncMappings", "X86Continuations", "X86CodeBase", "X86CodeEnd",
+                                  "X86ImageBase", "X86ImageEnd", "X86EntryPoint", "X86KernelThunk"})
+            exports += F("    %s DATA\n", table);
+        for (const auto* list : {&funcs, &absent}) {
+            for (uint32_t f : *list) {
+                std::string name = FuncName(f);
+                exports += F("    __imp__%s\n", name.c_str());
+                aliases += F("    %s == __imp__%s\n", name.c_str(), name.c_str());
+            }
+        }
+        WriteIfChanged(out_ / "exports.def", library + exports);
+        WriteIfChanged(out_ / "imports.def", library + exports + aliases);
+    }
 
     std::string stats = F("functions %zu\ninstructions %zu\n", funcs.size(), insn_count_);
     for (auto& [k, v] : unimpl_) stats += F("unimplemented %s %zu\n", k.c_str(), v);

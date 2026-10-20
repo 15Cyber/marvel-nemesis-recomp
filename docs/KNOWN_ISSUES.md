@@ -13,6 +13,9 @@
 
 ## Pending checks
 
+- The portable first-launch flow was checked with developer paths/include/library variables removed on the existing PC. A second Windows machine without development tools installed remains untested.
+- The new EXE/DLL layout has automated preparation, recovery, synthetic ABI and native boot smoke coverage. The earlier hands-on gameplay/save checks below predate this layout; a full gameplay/save regression of the new package is still welcome.
+
 - Build and gameplay on a second PC; broader coverage beyond the maintainer's smoke checks.
 - AMD/Intel GPUs, Windows 10, broader campaign and device hot-plug coverage.
 - Autosave restoration after normal campaign Load/reset following a Development session. The public fresh-folder save test did not establish this separate behavior.

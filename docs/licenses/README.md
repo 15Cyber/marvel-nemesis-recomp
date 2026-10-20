@@ -1,6 +1,6 @@
 # Third-party software and attribution
 
-The full license texts listed here are retained for the source candidate. CMake fetches build dependencies from their upstream repositories; this directory contains notices, not their source trees or compiled binaries. Project-owned additions use the root [MIT license](../../LICENSE); original third-party copyright notices remain intact.
+The full license texts listed here are retained for the sources and portable package. CMake fetches developer-build dependencies from their upstream repositories. The Windows package includes the host, portable Clang/LLD/recompiler and redistributable runtime components; this directory supplies their notices. Project-owned additions use the root [MIT license](../../LICENSE); original third-party copyright notices remain intact.
 
 | Component | Role | License notice |
 | --- | --- | --- |
@@ -11,7 +11,9 @@ The full license texts listed here are retained for the source candidate. CMake 
 | Dear ImGui | PC panel | [MIT](Dear-ImGui-MIT.txt) |
 | SDL | Controllers | [zlib](SDL-zlib.txt) |
 | SMAA | Shader and generic lookup tables | [MIT-style notice](SMAA-MIT.txt) |
-| SCDA-XBERecomp | SMAA packaging and GTAO integration reference | [MIT](SCDA-XBERecomp-MIT.txt) |
+| SCDA-XBERecomp | Graphics reference, first-launch compiler and separate DLL layout | [MIT](SCDA-XBERecomp-MIT.txt) |
+| LLVM Clang/LLD | Portable first-launch compiler/linker | [Apache 2.0 with LLVM exceptions](LLVM-Apache-2.0-with-exceptions.txt) |
+| Microsoft runtime components | Visual C++ runtime and D3D compiler DLLs in the Windows package | [Component notice](Microsoft-runtime-notice.txt) |
 
 Additional original SDK notices are in [THIRD_PARTY.txt](../../sdk/THIRD_PARTY.txt). Copyright lines and license headers in source files remain intact. The notices below describe the graphics integration provenance.
 

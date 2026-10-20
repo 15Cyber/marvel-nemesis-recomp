@@ -280,6 +280,10 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
 
     app::GameFiles game;
     if (!app::FindGame(game)) return 1;
+#ifdef X86_HOST_CODE
+    if (!app::PrepareGameCode(game)) return 1;
+    if (std::wcsstr(GetCommandLineW(), L"--prepare-only")) return 0;
+#endif
 
     bool splash = app::OpenSplash(), handover = app::StartHandover();
 

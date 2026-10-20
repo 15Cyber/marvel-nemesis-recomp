@@ -1,5 +1,7 @@
 # Building from your own game files
 
+These instructions are for developers. Players can use the portable Windows ZIP from [Releases](https://github.com/15Cyber/marvel-nemesis-recomp/releases), supply their own game in `assets/`, and run the EXE. The included compiler prepares game code on first launch without a Visual Studio installation.
+
 ## Requirements
 
 - 64-bit Windows and a Direct3D 12-capable GPU. Existing gameplay validation is on Windows 11/NVIDIA; Windows 10 and AMD/Intel coverage remain unconfirmed.
@@ -16,7 +18,7 @@ The build uses both standalone Clang and Visual Studio's LLVM utilities. On 19 O
 
 Obtain the complete source tree, including the bundled `sdk/`. Use a fresh local folder; do not copy an existing `out`, `generated`, settings, saves or mods folder into it. Do not run SDK Sync.
 
-The alpha is distributed as sources only. No original executable, generated code or prebuilt game executable is provided.
+The source tree contains no original executable, generated game code or prepared game-code DLL. The Windows release provides a separately built host EXE and portable compiler tools.
 
 ## 2. Extract your own disc image
 
@@ -51,7 +53,7 @@ Run `build.bat` from Explorer or a terminal. It checks the XBE before compilatio
 
 The first configuration downloads dependencies from their upstream repositories. The first build generates C++ from your XBE and compiles it. Time and resource requirements depend on the PC; no 30–90 minute guarantee is made.
 
-Output: `out/build/release/MarvelNemesis.exe`. Retain the source folder's `assets` for the usual development layout. Accept the launch prompt or start the executable yourself.
+Output: `out/build/release/MarvelNemesis.exe` and `MarvelNemesis.dll`. The EXE contains the host runtime and title-specific hooks; generated game code lives in the separate DLL. Retain the source folder's `assets` for the usual development layout. Accept the launch prompt or start the executable yourself.
 
 ## 4. First-run checklist
 
@@ -61,8 +63,22 @@ Output: `out/build/release/MarvelNemesis.exe`. Retain the source folder's `asset
 - Save manually, close the process, reopen and load the save.
 - Record hardware, tool versions, build duration and any errors before enabling optional effects/mods.
 
-This is a manual checklist for the tester; no game or compiler was run as part of preparing these sources. Preserve your existing saves separately before testing a new build.
+Preserve your existing saves separately before testing a new build. Validation results and their limits are recorded in [Validation](VALIDATION.md).
 
 ## Distribution
 
-Do not distribute the built game, PDB, generated sources, assets or community mods with this alpha. The original development binary-packaging script is omitted from the project root. SDK templates are upstream development material and do not define this project's release policy.
+Run `release.bat`, or `release.ps1` with explicit `-BuildDirectory` and `-OutputDirectory`, after building the host target. The script reads an explicit file allowlist and creates `MarvelNemesis-Windows-x64.zip` plus a SHA-256 digest. Choose a fresh output directory for each package; existing ZIPs are not overwritten.
+
+It packages the host EXE, Clang/LLD, recompiler, import library, headers/configuration, required Windows runtime DLLs, licenses and instructions. It excludes the prepared `MarvelNemesis.dll`, `compiler/work/`, original XBE/data, generated sources, PDB, saves and mods. The `.lib` included with the compiler is an import library describing the host's exported interfaces, not game instruction bodies.
+
+Do not distribute your locally generated game-code DLL or work directory. SDK templates are upstream development material and do not define this project's release policy.
+
+## Distribution checks
+
+From a Visual Studio x64 developer shell with Clang/LLD and Python in PATH:
+
+```powershell
+python tests/check_distribution.py --package out/packages/MarvelNemesis-Windows-x64.zip
+```
+
+The synthetic DLL fixture checks native overrides, fallback bodies, direct original-body calls, runtime imports and exceptions across the DLL boundary. Package checks verify the allowlist and hashes. `MarvelNemesis.exe --prepare-only` performs preparation/loading and exits without starting gameplay; this is a diagnostic path for isolated first-run checks.

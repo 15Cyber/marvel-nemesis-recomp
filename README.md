@@ -6,12 +6,12 @@ Built with **[TGP482/XboxXBERecomp](https://github.com/TGP482/XboxXBERecomp)** �
 
 Return to the campaign and local Versus with cleaner edges, configurable shadows, optional ambient occlusion and the freedom to choose your resolution and frame-rate limit. Explore developer-only scenes retained in the game data, remap your keyboard/controller, and experiment with compatible replacement resources through a portable mods folder.
 
-**Status: alpha · Windows x64 · Direct3D 12 · source-only distribution.** Fresh-folder build, tested gameplay and save/close/reopen/load have been approved on the maintainer's PC. This is an evolving community project, not a claim of complete compatibility. See [Validation](docs/VALIDATION.md) and [known limitations](docs/KNOWN_ISSUES.md).
+**Status: alpha · Windows x64 · Direct3D 12 · portable Windows package and source code.** This is an evolving community project, not a claim of complete compatibility. See [Validation](docs/VALIDATION.md) and [known limitations](docs/KNOWN_ISSUES.md) for the scope of testing.
 
 **AI-assisted development:** maintained by **15Cyber**, with assistance from **OpenAI Codex** and **Anthropic Claude** during research, implementation, debugging and documentation. Project direction, hands-on gameplay testing and approval of changes are handled by the maintainer.
 
 > **Bring your own game. We do not support piracy.**
-> You must provide files from your own legally acquired, supported original Xbox copy. This repository does not provide the game, disc images, original/recompiled game executables, generated game code or downloadable texture packs. Do not request or share pirated copies, game-download links or copyrighted game resources in issues or pull requests. The images below are gameplay captures supplied by the maintainer for documentation, not usable game resources.
+> You must provide files from your own legally acquired, supported original Xbox copy. No disc images, original game executables, prepared game-code DLLs, generated game sources or texture packs are supplied. The Windows package includes the host executable and compiler tools; your game's code is prepared locally from your own XBE. Do not request or share pirated copies, game-download links or copyrighted game resources in issues or pull requests. The images below are gameplay captures supplied by the maintainer for documentation, not usable game resources.
 
 ## See the port in action
 
@@ -119,7 +119,18 @@ The port creates a **`mods/` folder beside the executable**. Compatible replacem
 
 Use only mods you have permission to use and redistribute. No community texture packs or original game resources are included. [How file overrides work](docs/USAGE.md#file-mods).
 
-## Build and run
+## Play — no Visual Studio installation required
+
+1. Download **MarvelNemesis-Windows-x64.zip** from [Releases](https://github.com/15Cyber/marvel-nemesis-recomp/releases). The automatic "Source code" archives are intended for developers.
+2. Extract the complete ZIP into a writable folder. Keep `compiler/` beside `MarvelNemesis.exe`.
+3. Put your own supported Xbox game files in `assets/`: the extracted `default.xbe` with all game directories, or your own game ISO.
+4. Run `MarvelNemesis.exe`. First launch translates and compiles your XBE locally, then starts the game. A progress window is shown; this can take several minutes. Later launches reuse the generated `MarvelNemesis.dll`.
+
+No Visual Studio, CMake or Ninja installation is required for this player package. It includes the recompiler, Clang/LLD and required runtime DLLs. Keep `compiler/` for future preparation/repair. Completed compilation files are retained when preparation is interrupted. See the package's `README.txt` and [Usage](docs/USAGE.md).
+
+The prepared game-code DLL and `compiler/work/` belong on your own computer; do not redistribute them. First-launch duration and memory usage depend on the PC. Use a fresh folder when testing an update and preserve your existing saves separately.
+
+## Build from source — for developers
 
 Only an original Xbox `default.xbe` with SHA-1 **`66481feb81d9a00a63f0d2f0a203a297b712cfb5`** is supported. Other revisions/regions, prototypes and GameCube/PS2/PSP versions are not supported build inputs. The hash check identifies the executable, not the completeness of the remaining game data.
 
@@ -128,7 +139,7 @@ Only an original Xbox `default.xbe` with SHA-1 **`66481feb81d9a00a63f0d2f0a203a2
 3. Run `build.bat`. First configuration fetches dependencies and requires Internet access. Total first-build time has not been measured; the successful local fresh-folder build is recorded in [Validation](docs/VALIDATION.md).
 4. Start your locally built `out/build/release/MarvelNemesis.exe`.
 
-Keep the bundled `sdk/`, which contains local compatibility fixes. Do not run SDK Sync or replace it with an unrelated upstream version. No prebuilt game executable is supplied with this alpha.
+Keep the bundled `sdk/`, which contains local compatibility fixes. Do not run SDK Sync or replace it with an unrelated upstream version. Developer builds produce the host EXE and a separate game-code DLL; `release.bat` packages only the host and portable compiler, excluding that DLL and all game resources.
 
 ## Where the project may go next
 

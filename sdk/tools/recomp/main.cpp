@@ -53,7 +53,8 @@ static bool ParseExit(const toml::node* n, Hook::Exit& e) {
 static bool LoadConfig(const fs::path& path, Config& cfg, const fs::path& xdk_dir) {
     toml::table t;
     try {
-        t = toml::parse_file(path.string());
+        std::ifstream input(path, std::ios::binary);
+        t = toml::parse(input);
     } catch (const toml::parse_error& e) {
         std::fprintf(stderr, "%s: %s\n", path.string().c_str(), std::string(e.description()).c_str());
         return false;
@@ -78,6 +79,7 @@ static bool LoadConfig(const fs::path& path, Config& cfg, const fs::path& xdk_di
             if (auto s = i.value<std::string>())
                 if (!LoadConfig(dir / *s, cfg, xdk_dir)) return false;
     if (auto v = t["xbe"]["path"].value<std::string>()) cfg.xbe_path = *v;
+    if (auto v = t["xbe"]["library"].value<std::string>()) cfg.library = *v;
     if (auto v = t["xbe"]["title"].value<int64_t>()) cfg.title = uint32_t(*v);
     if (auto v = t["xbe"]["entry"].value<int64_t>()) cfg.entry = uint32_t(*v);
     if (auto a = t["xbe"]["trace"].as_array())
@@ -194,12 +196,16 @@ static bool CheckOverrides(const Analysis& an) {
     return ok;
 }
 
+#ifdef _WIN32
+int wmain(int argc, wchar_t** argv) {
+#else
 int main(int argc, char** argv) {
-    std::vector<std::string> args;
+#endif
+    std::vector<fs::path> args;
     fs::path xdk_dir;
     bool usage = false;
     for (int i = 1; i < argc; i++) {
-        if (std::strcmp(argv[i], "--xdk")) args.push_back(argv[i]);
+        if (fs::path(argv[i]) != "--xdk") args.push_back(argv[i]);
         else if (++i < argc) xdk_dir = argv[i];
         else usage = true;
     }
@@ -212,7 +218,7 @@ int main(int argc, char** argv) {
     if (!LoadConfig(cfg_path, cfg, xdk_dir)) return 1;
     for (auto& [name, locs] : cfg.abi)
         if (!cfg.symbols.count(name)) {
-            std::fprintf(stderr, "%s: [abi] %s is not a [symbols] name\n", args[0].c_str(), name.c_str());
+            std::fprintf(stderr, "%s: [abi] %s is not a [symbols] name\n", args[0].string().c_str(), name.c_str());
             return 1;
         }
     fs::path root = cfg_path.parent_path().parent_path();  // the config sits in <game>/config
@@ -235,7 +241,7 @@ int main(int argc, char** argv) {
                  img.title_id, img.entry, img.kernel_thunk);
     if ((cfg.title && cfg.title != img.title_id) || (cfg.entry && cfg.entry != img.entry)) {
         std::fprintf(stderr, "%s was written for title %08X entry %08X, not this image: delete it so build.bat writes a new one\n",
-                     args[0].c_str(), cfg.title, cfg.entry);
+                     args[0].string().c_str(), cfg.title, cfg.entry);
         return 1;
     }
 

@@ -6,6 +6,7 @@ title = 0x4541038A
 entry = 0x113889
 xdk = 5849
 out = "generated/game"
+library = "MarvelNemesis.dll"
 partitions = 128
 code_sections = [".text", "D3D", "XONLINE", "XNET", "D3DX", "XGRPH", "DSOUND", "XPP"]
 

@@ -1,5 +1,13 @@
 # Usage
 
+## Portable Windows package
+
+Extract the full `MarvelNemesis-Windows-x64.zip`, put your own supported original Xbox game files or ISO in `assets/`, and run `MarvelNemesis.exe`. First launch prepares the game code locally; later launches reuse `MarvelNemesis.dll`. Visual Studio, CMake and Ninja are not required for this package.
+
+Keep `compiler/` for repair and updates. Cancelling preparation retains completed objects. Logs are written to `logs/compile.log` and `logs/marvelnemesis.log`. If the compiler folder is incomplete, extract the complete package again. The prepared game-code DLL and `compiler/work/` are local derived files and must not be shared in bug reports.
+
+Use a writable folder with sufficient free disk space and memory. Extract updates into a fresh folder and preserve your saves separately. The automatic GitHub "Source code" downloads are for developer builds; select the named Windows ZIP to play.
+
 ## Settings and input
 
 Use **Options → PC Settings** for the native English menu or **F10** for the PC panel. Both share settings. Apply/save writes `settings.toml` beside the executable. Display changes have a confirmation timeout; presets and effect controls are independent.

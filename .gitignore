@@ -6,6 +6,9 @@
 *.exe
 *.obj
 *.o
+*.dll
+*.lib
+/compiler/
 
 # recompiled code, derived from the game
 /generated/

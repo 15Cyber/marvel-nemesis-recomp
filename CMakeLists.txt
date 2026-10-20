@@ -11,6 +11,7 @@ set(SDK ${CMAKE_CURRENT_SOURCE_DIR}/sdk)
 if(NOT EXISTS "${SDK}/cmake/XbeRecomp.cmake")
     message(FATAL_ERROR "The bundled sdk/ is missing. Obtain the complete source tree; do not substitute or SDK Sync an upstream checkout.")
 endif()
+set(XBE_SEPARATE_CODE ON)
 include("${SDK}/cmake/XbeRecomp.cmake")
 
 file(GLOB XBE_HOST_SOURCES CONFIGURE_DEPENDS src/*/*.cpp)

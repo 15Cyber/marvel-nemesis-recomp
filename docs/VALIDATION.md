@@ -1,4 +1,24 @@
-# Public alpha candidate validation
+# Public alpha validation
+
+## Separate DLL and portable compiler — 19–20 October 2026
+
+The first-launch compiler changes were compiled in a separate test workspace using the existing supported game data. Production saves were not copied into or used by the isolated package tests. The host EXE was about 4.7 MB; game instruction bodies were excluded from it and prepared into a separate local DLL.
+
+Checks completed on the existing Windows/NVIDIA development PC:
+
+- A synthetic game-independent fixture passed native override, fallback/original-body calls, runtime import and cross-DLL exception assertions. A `remainder` math check was added for the operation used by this game's generated x87 code.
+- The packaging allowlist and all ZIP manifest hashes passed. No original XBE/data, prepared game-code DLL, generated work files, PDB, saves or mods were included.
+- An extracted package in a path containing spaces prepared all 129 generated translation units with `PATH` restricted to Windows system directories and developer include/library environment variables removed. This intermediate candidate took **48.01 seconds**, exited with code 0 and loaded its locally produced DLL. A cached diagnostic reopening took **0.10 seconds** and left the DLL hash unchanged. These are measured preparation examples on this PC, not full launch timings or promises for other systems.
+- A forced interruption retained three completed objects. Restart prepared the remaining 126 and loaded the DLL successfully.
+- A cached run succeeded with `clang.exe` temporarily absent. Missing compiler plus missing DLL returned an error with a diagnostic. Restoring the compiler repaired the missing DLL using existing objects (`compiling 0 files`).
+- Native boot from the locally generated DLL verified the XBE, initialized isolated saves/mods, D3D12 and the original shadow buffer, and followed the logo-skip paths. A bounded 45-second smoke process remained alive until intentionally stopped by the test driver; no natural exit or save-round-trip result is claimed for that check.
+- The final ZIP passed the manifest/hash check and a normal first launch with the progress window in a folder containing spaces and an accented character. After correcting TOML/path handling, it compiled all 129 files, loaded the local DLL at 57.86 seconds and reached D3D12/logo-skip initialization at 82.33 seconds. Settings were loaded from that same folder. The test driver then intentionally stopped the process; this was an automatic boot check, not a hands-on gameplay session.
+- A deliberately altered copy of the XBE was rejected before preparation; no game-code DLL was produced. The original game files were preserved.
+- The final package's cached diagnostic reopening completed with exit code 0 in 0.23 seconds and left the DLL hash unchanged. The complete developer build also linked both the host EXE and the separate game-code DLL successfully.
+
+Final Windows ZIP SHA-256: `466edbcf15413caa04a35db7645c1224a22373b2df27795e97f340902fa6d7a5`.
+
+This environment still has development software installed globally; the restricted process environment and freestanding compiler flags check independence from those tool paths/headers/libraries. A separate PC without development software installed remains untested. Earlier hands-on gameplay/menu/save validation below predates the new DLL layout and does not establish a full regression of this package.
 
 ## Fresh-folder build — 19 October 2026
 
@@ -37,4 +57,4 @@ After the initial gameplay check, the user explicitly reported manually saving, 
 
 ## Remaining validation
 
-The build and smoke/save checks were performed on the same development PC. Broader campaign/arena coverage, AMD/Intel hardware, ISO mods and autosave restoration after Development Load/reset remain open as listed in KNOWN_ISSUES.md. The earlier development build has additional reported coverage; do not transfer all those results automatically to this new binary. No publication has taken place.
+The build and smoke/save checks were performed on the same development PC. Broader campaign/arena coverage, AMD/Intel hardware, ISO mods and autosave restoration after Development Load/reset remain open as listed in KNOWN_ISSUES.md. The earlier development build has additional reported coverage; do not transfer all those results automatically to a new binary.

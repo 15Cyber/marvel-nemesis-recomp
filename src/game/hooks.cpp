@@ -133,7 +133,7 @@ X86_FUNC(sub_0039D5F0) {
 
 // Main scene: objects submitted, dynamic shadows and the deferred effect list still pending.
 // This is a mid-function callback: leave every guest register/flag/stack slot untouched.
-void MarvelAmbientOcclusion(X86Context& ctx, uint8_t* base) {
+X86_HOST_API void MarvelAmbientOcclusion(X86Context& ctx, uint8_t* base) {
     (void)base;
     if (!(ctx.ebx & 4)) d3d::AmbientOcclusion();
 }

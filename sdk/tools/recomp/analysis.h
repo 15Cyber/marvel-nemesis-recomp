@@ -27,6 +27,7 @@ struct Config {
     uint32_t title = 0, entry = 0;  // the image xbe_symbols wrote the config for, 0 = unchecked
     std::set<uint32_t> trace;       // functions whose calls and results are logged
     std::string out_dir;
+    std::string library;  // optional separate game-code DLL
     std::vector<std::string> code_sections;
     std::vector<std::string> code_prefixes;
     uint32_t partitions = 128;

@@ -49,7 +49,8 @@ void Load() {
     Settings& s = Get();
     toml::table t;
     try {
-        t = toml::parse_file(File().string());
+        std::ifstream input(File(), std::ios::binary);
+        t = toml::parse(input);
     } catch (...) {
         return;
     }

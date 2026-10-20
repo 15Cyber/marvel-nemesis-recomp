@@ -1,0 +1,13 @@
+Microsoft runtime components in the portable Windows package
+
+msvcp140.dll, vcruntime140.dll and vcruntime140_1.dll are the x64 Microsoft
+Visual C++ runtime components from the installed Visual Studio redistributable.
+d3dcompiler_47.dll is the x64 Direct3D compiler redistributable from the Windows SDK.
+These files are Microsoft components, not covered by this project's MIT license.
+Their original Microsoft copyright and version resources are retained.
+
+Visual C++ redistribution documentation:
+https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files
+
+Windows SDK terms:
+https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/

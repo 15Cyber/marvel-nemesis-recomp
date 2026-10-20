@@ -5,15 +5,39 @@
 #include <mutex>
 #include <unordered_set>
 #include <vector>
+#include <filesystem>
 
 #include "core/log.h"
 #include "cpu/x86_ops.h"
 #include "kernel/kernel.h"
 
 #ifdef _WIN32
+#include <windows.h>
 #include <intrin.h>
 #else
 #include <x86intrin.h>
+#endif
+
+#ifdef X86_HOST_CODE
+// CRT forwards used by SCDA's freestanding game-code DLL layout.
+#pragma comment(linker, "/EXPORT:memcpy=vcruntime140.memcpy")
+#pragma comment(linker, "/EXPORT:memmove=vcruntime140.memmove")
+#pragma comment(linker, "/EXPORT:memset=vcruntime140.memset")
+#pragma comment(linker, "/EXPORT:__CxxFrameHandler3=vcruntime140.__CxxFrameHandler3")
+#pragma comment(linker, "/EXPORT:_CxxThrowException=vcruntime140._CxxThrowException")
+#pragma comment(linker, "/EXPORT:sin=ucrtbase.sin")
+#pragma comment(linker, "/EXPORT:cos=ucrtbase.cos")
+#pragma comment(linker, "/EXPORT:tan=ucrtbase.tan")
+#pragma comment(linker, "/EXPORT:atan2=ucrtbase.atan2")
+#pragma comment(linker, "/EXPORT:fmod=ucrtbase.fmod")
+#pragma comment(linker, "/EXPORT:remainder=ucrtbase.remainder")
+#pragma comment(linker, "/EXPORT:sqrt=ucrtbase.sqrt")
+#pragma comment(linker, "/EXPORT:sqrtf=ucrtbase.sqrtf")
+#pragma comment(linker, "/EXPORT:log2=ucrtbase.log2")
+#pragma comment(linker, "/EXPORT:exp2=ucrtbase.exp2")
+#pragma comment(linker, "/EXPORT:ldexp=ucrtbase.ldexp")
+#pragma comment(linker, "/EXPORT:frexp=ucrtbase.frexp")
+uint32_t X86CodeBase = 0, X86CodeEnd = 0, X86ImageBase = 0, X86ImageEnd = 0, X86EntryPoint = 0, X86KernelThunk = 0;
 #endif
 
 namespace {
@@ -21,6 +45,10 @@ namespace {
 std::vector<X86Func*> g_table;  // one slot per code byte
 std::vector<bool> g_continuation;
 uint32_t g_lo = 0, g_hi = 0;
+#ifdef X86_HOST_CODE
+const X86FuncMapping* g_mappings = nullptr;
+const uint32_t* g_continuations = nullptr;
+#endif
 
 struct Export {
     const char* name = nullptr;
@@ -36,15 +64,56 @@ constexpr uint32_t kKernelThunkBase = 0xFE000000;
 
 namespace dispatch {
 
+#ifdef X86_HOST_CODE
+bool Load(const std::filesystem::path& dll) {
+    HMODULE module = LoadLibraryExW(dll.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+    if (!module) {
+        LOGE("game code: loading DLL failed (%lu)", GetLastError());
+        return false;
+    }
+    g_mappings = reinterpret_cast<const X86FuncMapping*>(GetProcAddress(module, "X86FuncMappings"));
+    g_continuations = reinterpret_cast<const uint32_t*>(GetProcAddress(module, "X86Continuations"));
+    struct Field { const char* name; uint32_t* value; } fields[] = {
+        {"X86CodeBase", &X86CodeBase}, {"X86CodeEnd", &X86CodeEnd},
+        {"X86ImageBase", &X86ImageBase}, {"X86ImageEnd", &X86ImageEnd},
+        {"X86EntryPoint", &X86EntryPoint}, {"X86KernelThunk", &X86KernelThunk}};
+    bool ok = g_mappings && g_continuations;
+    for (auto& field : fields) {
+        auto* value = reinterpret_cast<const uint32_t*>(GetProcAddress(module, field.name));
+        if (value) *field.value = *value;
+        else ok = false;
+    }
+    if (!ok || X86CodeEnd <= X86CodeBase || X86CodeEnd - X86CodeBase > (64u << 20)) {
+        LOGE("game code: missing or invalid DLL tables");
+        FreeLibrary(module);
+        return false;
+    }
+    LOGR("Game code: loaded local DLL");
+    return true;
+}
+#endif
+
 void Init() {
     g_lo = X86CodeBase;
     g_hi = X86CodeEnd;
     g_table.assign(g_hi - g_lo, nullptr);
     size_t n = 0;
-    for (const X86FuncMapping* m = X86FuncMappings; m->host; m++, n++)
+    for (const X86FuncMapping* m =
+#ifdef X86_HOST_CODE
+         g_mappings;
+#else
+         X86FuncMappings;
+#endif
+         m->host; m++, n++)
         if (m->guest >= g_lo && m->guest < g_hi) g_table[m->guest - g_lo] = m->host;
     g_continuation.assign(g_hi - g_lo, false);
-    for (const uint32_t* c = X86Continuations; *c; c++)
+    for (const uint32_t* c =
+#ifdef X86_HOST_CODE
+         g_continuations;
+#else
+         X86Continuations;
+#endif
+         *c; c++)
         if (*c >= g_lo && *c < g_hi) g_continuation[*c - g_lo] = true;
     LOGI("dispatch: %zu functions over %08X..%08X", n, g_lo, g_hi);
 }

@@ -48,6 +48,25 @@ file(GLOB XBE_RUNTIME_SOURCES CONFIGURE_DEPENDS ${XBE_SDK_DIR}/runtime/*/*.cpp)
 # SDL's headers go to the input code alone (it is linked LINK_ONLY), so the generated sources' compile line stays the same
 set_source_files_properties(${XBE_SDK_DIR}/runtime/core/input.cpp PROPERTIES INCLUDE_DIRECTORIES "${sdl3_SOURCE_DIR}/include")
 
+if(XBE_SEPARATE_CODE)
+    get_filename_component(XBE_LLVM_BIN ${CMAKE_CXX_COMPILER} DIRECTORY)
+    set(XBE_COMPILER_DIR ${CMAKE_BINARY_DIR}/compiler)
+    file(GLOB XBE_COMPILER_HEADERS CONFIGURE_DEPENDS ${XBE_SDK_DIR}/runtime/cpu/x86_*.h)
+    file(GLOB XBE_FREESTANDING_HEADERS CONFIGURE_DEPENDS ${XBE_SDK_DIR}/runtime/cpu/freestanding/*)
+    file(GLOB XBE_COMPILER_CONFIGS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/*.toml)
+    add_custom_target(compiler_files ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${XBE_COMPILER_DIR}/config ${XBE_COMPILER_DIR}/include/cpu
+                ${XBE_COMPILER_DIR}/include/freestanding ${XBE_COMPILER_DIR}/xdk/5849
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XBE_LLVM_BIN}/clang.exe ${XBE_LLVM_BIN}/lld-link.exe ${XBE_COMPILER_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/docs/licenses/LLVM-Apache-2.0-with-exceptions.txt ${XBE_COMPILER_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XBE_COMPILER_CONFIGS} ${XBE_COMPILER_DIR}/config
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XBE_COMPILER_HEADERS} ${XBE_COMPILER_DIR}/include/cpu
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XBE_FREESTANDING_HEADERS} ${XBE_COMPILER_DIR}/include/freestanding
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${XBE_SDK_DIR}/xdk/5849/layout.toml ${XBE_COMPILER_DIR}/xdk/5849
+        VERBATIM)
+    set_target_properties(xbe_recomp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${XBE_COMPILER_DIR})
+endif()
+
 # One executable per recompiled image: its code from config/<config> (partitions as that config sets them),
 # the SDK runtime, XBE_HOST_SOURCES shared by every image of the game, and src/<game_dir> hooks only this image has.
 # Expects assets/<xbe> and the config's out = "generated/<game_dir>". At run time the game may be a disc image instead.
@@ -59,9 +78,13 @@ function(add_xbe_image target xbe config partitions game_dir)
         list(APPEND GEN_SOURCES ${GEN}/x86_recomp.${i}.cpp)
     endforeach()
     file(GLOB configs CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/*.toml ${XBE_SDK_DIR}/xdk/*/*.toml)
+    set(CODE_DLL_FILES)
+    if(XBE_SEPARATE_CODE)
+        set(CODE_DLL_FILES ${GEN}/exports.def ${GEN}/imports.def)
+    endif()
     add_custom_command(
         OUTPUT ${GEN}/codegen.stamp
-        BYPRODUCTS ${GEN_SOURCES} ${GEN}/x86_recomp_shared.h ${GEN}/image_symbols.h
+        BYPRODUCTS ${GEN_SOURCES} ${GEN}/x86_recomp_shared.h ${GEN}/image_symbols.h ${CODE_DLL_FILES}
         COMMAND xbe_recomp config/${config} --xdk ${XBE_SDK_DIR}/xdk
         COMMAND ${CMAKE_COMMAND} -E touch ${GEN}/codegen.stamp
         DEPENDS xbe_recomp ${configs} ${CMAKE_CURRENT_SOURCE_DIR}/assets/${xbe}
@@ -78,6 +101,34 @@ function(add_xbe_image target xbe config partitions game_dir)
     file(SHA1 ${xbe_file} xbe_sha1)
     set(XBE_HASH ${CMAKE_CURRENT_BINARY_DIR}/${target}_xbe.cpp)
     file(CONFIGURE OUTPUT ${XBE_HASH} CONTENT "extern const char kImageSha1[] = \"${xbe_sha1}\";\n")
+    if(XBE_SEPARATE_CODE)
+        add_custom_command(OUTPUT ${GEN}/code.lib
+            COMMAND ${XBE_LLVM_BIN}/lld-link.exe /lib /machine:x64 /def:${GEN}/imports.def /out:${GEN}/code.lib
+            DEPENDS ${GEN}/codegen.stamp
+            VERBATIM)
+        add_custom_target(imports_${target} DEPENDS ${GEN}/code.lib)
+        add_executable(${target} WIN32 ${XBE_RUNTIME_SOURCES} ${XBE_HOST_SOURCES} ${GAME_SOURCES} ${XBE_IMGUI_SOURCES} ${XBE_HASH})
+        add_dependencies(${target} recompile_${target} imports_${target} compiler_files)
+        set_target_properties(${target} PROPERTIES ENABLE_EXPORTS ON ARCHIVE_OUTPUT_DIRECTORY ${XBE_COMPILER_DIR})
+        target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${XBE_SDK_DIR}/runtime ${GEN})
+        target_include_directories(${target} SYSTEM PRIVATE ${imgui_SOURCE_DIR})
+        target_compile_definitions(${target} PRIVATE UNICODE _UNICODE _CRT_SECURE_NO_WARNINGS X86_HOST_CODE)
+        target_compile_options(${target} PRIVATE -fno-strict-aliasing)
+        target_link_libraries(${target} PRIVATE tomlplusplus::tomlplusplus $<LINK_ONLY:SDL3::SDL3-static>
+            d3d12 dxgi dxguid d3dcompiler xaudio2 ole32 windowscodecs dbghelp winmm dwmapi ws2_32 ${GEN}/code.lib delayimp)
+        target_link_options(${target} PRIVATE -fuse-ld=lld -Wl,/delayload:${target}.dll)
+        # The DLL is built from the player's XBE at first launch, never included in a release.
+        add_library(${target}_code SHARED ${GEN_SOURCES})
+        set_target_properties(${target}_code PROPERTIES OUTPUT_NAME ${target} CXX_EXTENSIONS OFF)
+        add_dependencies(${target}_code recompile_${target})
+        target_include_directories(${target}_code PRIVATE ${XBE_SDK_DIR}/runtime ${GEN})
+        target_include_directories(${target}_code SYSTEM PRIVATE ${XBE_SDK_DIR}/runtime/cpu/freestanding)
+        target_compile_definitions(${target}_code PRIVATE X86_GAME_CODE)
+        target_compile_options(${target}_code PRIVATE -fms-compatibility-version=19.40 -nostdinc -nostdinc++ -w)
+        target_link_libraries(${target}_code PRIVATE ${target})
+        target_link_options(${target}_code PRIVATE -fuse-ld=lld -Wl,/noentry,/nodefaultlib,/opt:noicf -Wl,/def:${GEN}/exports.def)
+        return()
+    endif()
     add_executable(${target} WIN32 ${XBE_RUNTIME_SOURCES} ${XBE_HOST_SOURCES} ${GAME_SOURCES} ${GEN_SOURCES} ${XBE_IMGUI_SOURCES} ${XBE_HASH})
     add_dependencies(${target} recompile_${target})
     target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${XBE_SDK_DIR}/runtime ${GEN})

@@ -78,6 +78,7 @@ struct GameFiles {
     std::vector<uint8_t> xbe;
 };
 bool FindGame(GameFiles& game);
+bool PrepareGameCode(const GameFiles& game);  // builds the DLL locally using compiler/, then loads it
 // Check the bytes about to be loaded against the build hash and an optional title pin.
 // Shared by asset discovery and Boot, including hosts that bypass FindGame.
 bool ValidateGameImage(const std::vector<uint8_t>& xbe, std::string& sha1, std::string& error,
