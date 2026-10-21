@@ -37,4 +37,5 @@ const app::GameInfo app::kGame = {
     .supported_xbe_sha1 = "66481feb81d9a00a63f0d2f0a203a297b712cfb5",
     .data_directory = "saves",
     .mods_directory = "mods",
+    .expand_widescreen = true,
 };

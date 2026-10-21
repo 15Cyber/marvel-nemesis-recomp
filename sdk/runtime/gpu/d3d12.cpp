@@ -586,7 +586,7 @@ private:
     void CaptureShader(const char* kind, uint64_t key, const std::string& src);
     void SetTextureViewsAndSamplers(const State& s, const Assembled& a, DrawTextures& stages);
     uint32_t EnsureStageSamplers(const State& s, const DrawTextures& stages, bool clamp);
-    void SetViewportScissor(const State& s, uint32_t gw);
+    void SetViewportScissor(const State& s, uint32_t gw, float horizontal_scale);
     void SetBlendFactorStencilRef(const State& s);
     void DrawGeometry(const Assembled& a);
     void UploadVertexBuffers(const Assembled& a);
@@ -2790,6 +2790,9 @@ void D3D12Backend::UploadConstants(const State& s, const DrawShaders& sh, const 
     std::memcpy(vc.cpu, s.vsc.data(), sizeof(s.vsc));
     Alloc dc = Upload(sizeof(DrawConstants), 256);
     FillSurfaceConstants(s, size, c);
+    const bool screen_target = size.w == guest_w_ && size.h == guest_h_;
+    c.frame[0] = screen_target && !s.full_width ?
+        app::LayoutFor(bb_w_, bb_h_, app::kGame.expand_widescreen, app::Widescreen()).ui_scale_x : 1.0f;
     // points: host pixels per console pixel, also keeps them off the far edge pull out of screen passes
     if (k.topo == uint32_t(Topology::Points)) c.surf[3] = PointScale();
     FillFogConstants(s, sh.prog, c);
@@ -2876,6 +2879,7 @@ void D3D12Backend::CaptureInputs(const State& s, const Assembled& a, const DrawC
         for (size_t i = 0; i < n; i++) fprintf(cap_, " %g", v[i]);
     };
     values("surf", c.surf, 4);
+    values("frame", c.frame, 4);
     values("fog", c.fog, 4);
     values("wvp", c.wvp, 16);
     values("wv", c.wv, 16);
@@ -3009,7 +3013,7 @@ void D3D12Backend::SetTextureViewsAndSamplers(const State& s, const Assembled& a
 }
 
 // viewport covers the target, the guest viewport is in the shader; scissor clips to it
-void D3D12Backend::SetViewportScissor(const State& s, uint32_t gw) {
+void D3D12Backend::SetViewportScissor(const State& s, uint32_t gw, float horizontal_scale) {
     float W = float(bound_rt_ ? bound_rt_->w : bound_ds_->w);
     float H = float(bound_rt_ ? bound_rt_->h : bound_ds_->h);
     D3D12_VIEWPORT vp{0, 0, W, H, 0, 1};
@@ -3025,6 +3029,8 @@ void D3D12Backend::SetViewportScissor(const State& s, uint32_t gw) {
         x1 = std::min(x1, LONG(s.scissors[2] * sc));
         y1 = std::min(y1, LONG(s.scissors[3] * sc));
     }
+    x0 = LONG(std::floor((x0 - W * 0.5f) * horizontal_scale + W * 0.5f));
+    x1 = LONG(std::ceil((x1 - W * 0.5f) * horizontal_scale + W * 0.5f));
     D3D12_RECT rect{std::clamp<LONG>(x0, 0, LONG(W)), std::clamp<LONG>(y0, 0, LONG(H)),
                     std::clamp<LONG>(x1, 0, LONG(W)), std::clamp<LONG>(y1, 0, LONG(H))};
     cl_->RSSetScissorRects(1, &rect);
@@ -3204,7 +3210,7 @@ void D3D12Backend::RenderAssembledDraw(const State& s, Assembled& a, uint32_t pr
     }
 
     SetTextureViewsAndSamplers(s, a, stages);
-    SetViewportScissor(s, size.w);
+    SetViewportScissor(s, size.w, c.frame[0]);
     SetBlendFactorStencilRef(s);
 
     uint32_t query = BeginCountedDraw(s);
@@ -3577,9 +3583,7 @@ void D3D12Backend::UploadGammaRamp(uint32_t brightness, uint32_t contrast) {
 }
 
 void D3D12Backend::BlitFrame(Target& t, ID3D12Resource* image) {
-    // 16:9 when the console reports a widescreen display, else 4:3
-    bool wide = app::Widescreen();
-    float aspect = wide ? 16.0f / 9.0f : 4.0f / 3.0f;
+    const float aspect = app::LayoutFor(bb_w_, bb_h_, app::kGame.expand_widescreen, app::Widescreen()).aspect;
     float w = float(bb_w_);
     float h = float(bb_h_);
     float vw = std::min(w, h * aspect);

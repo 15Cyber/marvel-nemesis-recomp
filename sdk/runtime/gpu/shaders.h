@@ -79,6 +79,7 @@ inline const ShaderHooks* g_shader_hooks = nullptr;
 // the constant buffer layout both stages share, register b1
 struct DrawConstants {
     float surf[4];      // target width, height, 1 / depth scale, 0
+    float frame[4];     // horizontal clip scale; UI stays inside the original canvas
     float fog[4];       // start, end, density, mode
     float fog_color[4];
     float misc[4];      // alpha ref, alpha func, shadow func, specular

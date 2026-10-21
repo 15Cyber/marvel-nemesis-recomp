@@ -13,11 +13,7 @@
 namespace game::pc_video {
 namespace { Settings g_settings; }
 OutputSize Output() {
-    std::lock_guard lock(app::UiLock());
-    RECT client{};
-    if (GetClientRect(static_cast<HWND>(app::Window()), &client) && client.right > 0 && client.bottom > 0)
-        return {uint32_t(client.right), uint32_t(client.bottom)};
-    const auto size = app::Output();
+    const auto size = app::ClientSize();
     return {size.width, size.height};
 }
 Settings Read() { std::lock_guard lock(app::UiLock()); return g_settings; }
@@ -41,8 +37,8 @@ void Draw(Settings& draft) {
     const char* names[] = {"Game original", "Preserve video aspect ratio", "Within a 4:3 frame", "Fill screen (crop)"};
     int scale = int(draft.scale);
     if (ImGui::Combo("Video framing", &scale, names, 4)) draft.scale = uint32_t(scale);
-    ImGui::TextWrapped("Original preserves the player. Preserve aspect ratio shows the whole video; 4:3 also limits the frame. Fill crops the edges without stretching.");
-    ImGui::TextWrapped("Applies only to VP6 videos. Camera, menus, HUD and 3D cutscenes are unchanged.");
+    ImGui::TextWrapped("Original automatically fits videos on ultrawide displays. Preserve aspect ratio shows the whole video; 4:3 also limits the frame. Fill crops the edges without stretching.");
+    ImGui::TextWrapped("These choices apply only to VP6 videos. Automatic ultrawide framing for the world and interface is separate.");
     ImGui::Checkbox("Skip EA and Marvel logos", &draft.skip_logos);
     ImGui::TextWrapped("Uses normal player completion. Campaign videos and the Attract demo are not skipped.");
     if (ImGui::Button("Restore Default Videos")) draft = Settings{};

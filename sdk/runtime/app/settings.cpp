@@ -264,6 +264,18 @@ Mode Output() {
     return Desktop();
 }
 
+Mode ClientSize() {
+    RECT client{};
+    if (GetClientRect(static_cast<HWND>(Window()), &client) && client.right > 0 && client.bottom > 0)
+        return {uint32_t(client.right), uint32_t(client.bottom)};
+    return Output();
+}
+
+FrameLayout PresentationLayout() {
+    const auto size = ClientSize();
+    return LayoutFor(size.width, size.height, kGame.expand_widescreen, Widescreen());
+}
+
 bool Widescreen() {
     std::lock_guard lock(UiLock());
     // asked per frame and per HUD quad: refresh the desktop shape after resolution/display changes

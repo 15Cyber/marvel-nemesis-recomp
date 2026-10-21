@@ -36,6 +36,7 @@ struct VOut {
 cbuffer VC : register(b0) { float4 c[192]; };
 cbuffer DC : register(b1) {
     float4 surf;
+    float4 frame;
     float4 fogp;
     float4 fogcolor;
     float4 misc;
@@ -235,6 +236,7 @@ const char* kVsEpilogue = R"(
     q.xyz *= p.w;
     q.w = p.w;
     o.pos = q;
+    o.pos.x *= frame.x;
     o.d0 = saturate(oD0);
     o.d1 = saturate(oD1);
     o.b0 = saturate(oB0);
@@ -797,6 +799,7 @@ std::string FixedVertexHlsl(uint16_t regs, bool pretransformed, uint64_t decode,
     if (surf.w == 0 && abs(sp.x - (surf.x - 0.5)) < 1e-3) cp.x = cp.w;
     if (surf.w == 0 && abs(sp.y - (surf.y - 0.5)) < 1e-3) cp.y = -cp.w;
     o.pos = cp;
+    o.pos.x *= frame.x;
     o.d0 = saturate(oD0);
     o.d1 = saturate(oD1);
     o.b0 = o.d0;
@@ -923,6 +926,7 @@ std::string PointHlsl() {
 [maxvertexcount(4)]
 void main(point VOut v[1], inout TriangleStream<VOut> strip) {
     float2 half_pixel = v[0].pos.w / surf.xy;  // in clip units, the target spans 2 across surf.xy pixels
+    half_pixel.x *= frame.x;
     // a target is read half a host pixel back (surf.w host pixels per console pixel): left and top reach that far
     float2 back = (0.5 - 1e-3) * 2 * half_pixel / surf.w;
     for (int i = 0; i < 4; i++) {

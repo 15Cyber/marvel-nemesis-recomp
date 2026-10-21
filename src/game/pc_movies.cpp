@@ -5,8 +5,10 @@
 #include <mutex>
 #include "app/app.h"
 #include "common/pc_video.h"
+#include "common/video_layout.h"
 #include "core/log.h"
 #include "xdk/hle.h"
+#include "xdk/d3d8.h"
 
 using namespace kernel;
 X86_FUNC(__imp__sub_001108D0);
@@ -18,6 +20,7 @@ std::recursive_mutex g_movie_lock;
 struct Layout {
     uint32_t player = 0, scale = 0, width = 0, height = 0, output_w = 0, output_h = 0;
     bool valid = false;
+    bool ultrawide = false;
 } g_layout;
 uint32_t g_skip_logs = 0;
 uint32_t g_layout_logs = 0;
@@ -38,7 +41,13 @@ void AdjustLayout(X86Context& ctx, uint32_t player) {
     uint32_t screen = R32(0x005246C8);
     uint32_t w = screen ? R16(screen + 0x78) : 0, h = screen ? R16(screen + 0x76) : 0;
     g_layout = {player, settings.scale, w, h, output.width, output.height, settings.scale == 0};
-    if (!settings.scale) return;
+    const auto layout = app::LayoutFor(output.width, output.height, app::kGame.expand_widescreen, app::Widescreen());
+    const bool ultrawide = layout.ui_scale_x < 1;
+    g_layout.ultrawide = ultrawide;
+    // Original geometry is anamorphic. Fit decoded pixels when the canvas exceeds 16:9.
+    const uint32_t scale = ultrawide && !settings.scale ? 1 : settings.scale;
+    if (!scale) return;
+    g_layout.valid = false;
     uint32_t info = GetInfo(ctx, player);
     // Confirmed by native quad X/Y extents: screen+0x78 width/+0x76 height;
     // decoder info+0x18 width/+0x1C height. Do not transpose these pairs.
@@ -49,21 +58,10 @@ void AdjustLayout(X86Context& ctx, uint32_t player) {
                                     w, h, film_w, film_h);
         return;
     }
-    float aspect = float(output.width) / output.height, film_aspect = float(film_w) / film_h;
-    float nx = 1, ny = 1;
-    if (settings.scale == 3) {
-        if (film_aspect > aspect) nx = film_aspect / aspect;
-        else ny = aspect / film_aspect;
-    } else {
-        float canvas = aspect;
-        if (settings.scale == 2) {
-            canvas = 4.0f / 3;
-            if (aspect > canvas) nx = canvas / aspect;
-            else ny = aspect / canvas;
-        }
-        if (film_aspect > canvas) ny *= canvas / film_aspect;
-        else nx *= film_aspect / canvas;
-    }
+    const float aspect = layout.aspect;
+    const float film_aspect = float(film_w) / film_h;
+    const auto extent = game::pc_video::VideoExtent(scale, aspect, film_aspect);
+    const float nx = extent.x, ny = extent.y;
     float left = (1 - nx) * w * 0.5f - 0.5f, top = (1 - ny) * h * 0.5f - 0.5f;
     float right = left + nx * w, bottom = top + ny * h;
     const float xy[4][2] = {{left, top}, {right, top}, {right, bottom}, {left, bottom}};
@@ -76,7 +74,7 @@ void AdjustLayout(X86Context& ctx, uint32_t player) {
     g_layout.valid = true;
     if (g_layout_logs++ < 16)
         LOGR("movies: layout scale=%u guest=%ux%u output=%ux%u film=%ux%u quad=%.1f,%.1f..%.1f,%.1f",
-             settings.scale, w, h, output.width, output.height, film_w, film_h, left, top, right, bottom);
+             scale, w, h, output.width, output.height, film_w, film_h, left, top, right, bottom);
 }
 }  // namespace
 
@@ -99,13 +97,17 @@ X86_FUNC(sub_001104C0) {
     bool changed = !g_layout.valid || g_layout.player != player || g_layout.scale != settings.scale ||
                    g_layout.width != w || g_layout.height != h ||
                    g_layout.output_w != output.width || g_layout.output_h != output.height;
-    if (changed && (settings.scale || g_layout.scale)) {
+    const bool ultrawide = app::LayoutFor(output.width, output.height, app::kGame.expand_widescreen,
+                                         app::Widescreen()).ui_scale_x < 1;
+    if (changed && (settings.scale || g_layout.scale || ultrawide || g_layout.ultrawide)) {
         // Rebuild from native geometry, never accumulate transforms. CallGuest supplies a real call frame.
         const X86Context saved = ctx;
         ctx.ecx = player;
         CallGuest(ctx, 0x001108D0, {});
         ctx = saved;
     }
+    // Geometry already uses the output aspect. Missing decoder metadata retains the original safe canvas.
+    d3d::FullWidthScope full_width(!ultrawide || g_layout.valid);
     __imp__sub_001104C0(ctx, base);
 }
 

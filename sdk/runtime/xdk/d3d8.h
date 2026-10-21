@@ -12,6 +12,23 @@ void AmbientOcclusion();  // explicit scene boundary, called by the title hook
 void Bloom(const gpu::BloomParameters&);  // after scene effects, before the HUD
 std::recursive_mutex& Lock();
 
+// Only the assignment holds the D3D lock; guest calls may take the UI lock.
+class FullWidthScope {
+    bool previous_;
+public:
+    explicit FullWidthScope(bool enabled = true) {
+        std::lock_guard lock(Lock());
+        previous_ = State().full_width;
+        State().full_width = enabled;
+    }
+    ~FullWidthScope() {
+        std::lock_guard lock(Lock());
+        State().full_width = previous_;
+    }
+    FullWidthScope(const FullWidthScope&) = delete;
+    FullWidthScope& operator=(const FullWidthScope&) = delete;
+};
+
 // Recorded geometry using the streams, textures and shaders already bound by the title.
 void RunPushBuffer(uint32_t push_buffer, uint32_t fixup);
 

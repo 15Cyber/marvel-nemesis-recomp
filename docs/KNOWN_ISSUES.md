@@ -13,6 +13,8 @@
 
 ## Pending checks
 
+- Ultrawide 21:9 passed a local Release build, geometry checks and DLL loading; the maintainer approved menus and combat in a 1720×720 window on 21 October 2026. Physical ultrawide fullscreen, exhaustive edge visibility, movies/campaign scenes and graphics combinations still need broader testing. Native fighter-introduction black bars remain within the centred 16:9 area; this was accepted in the windowed test. The earlier alpha.2 package predates this feature. See [Ultrawide](ULTRAWIDE.md).
+
 - The portable first-launch flow was checked with developer paths/include/library variables removed on the existing PC. A second Windows machine without development tools installed remains untested.
 - The new EXE/DLL layout has automated preparation, recovery, synthetic ABI and native boot smoke coverage. The earlier hands-on gameplay/save checks below predate this layout; a full gameplay/save regression of the new package is still welcome.
 

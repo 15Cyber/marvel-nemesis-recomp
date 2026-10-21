@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "app/frame_layout.h"
 
 namespace input {
 struct Pad;
@@ -63,8 +64,11 @@ void RefreshDisplayInfo(bool force = false);
 uint32_t RefreshRate();  // cached active window monitor rate; 0 if unavailable
 uint32_t EffectiveFpsCap();  // auto uses RefreshRate, or 60 if unavailable
 Mode Output();
+Mode ClientSize();  // actual window client area, falling back to Output before the window exists
+FrameLayout PresentationLayout();
 float RenderScale(uint32_t guest_height);
-// the output is 3:2 or wider: the console reports a widescreen TV and the frame is shown 16:9, else 4:3 as on a 4:3 TV
+// The console TV flag remains 16:9 for outputs 3:2 or wider, otherwise 4:3.
+// PresentationLayout supplies the title's extended host canvas separately.
 bool Widescreen();
 
 std::filesystem::path ExeDir();
@@ -134,6 +138,7 @@ struct GameInfo {
     const char* supported_xbe_sha1 = nullptr;
     const char* data_directory = nullptr; // nullptr keeps hdd; relative folder beside the exe
     const char* mods_directory = nullptr; // optional read-only D: file overlay beside the exe
+    bool expand_widescreen = false; // title supplies matching scene projection/frustum hooks
 };
 extern const GameInfo kGame;
 

@@ -52,6 +52,8 @@ Before/after ordering was supplied by the maintainer. These are different moment
 
 ### Display and performance controls
 
+- **Ultrawide 21:9.** The main scene widens horizontally, HUD/menus keep a centred 16:9 canvas, and VP6 movies retain their proportions. The maintainer approved menus and combat in a 1720×720 window on a 16:9 desktop. See the [build and validation guide](docs/ULTRAWIDE.md) for coverage and remaining checks. The earlier alpha.2 package predates this change.
+
 - **Choose your screen setup.** Fullscreen, borderless and windowed modes, monitor selection and available display resolutions let the port fit your desktop. Display changes use a confirmation timeout so an unusable selection can revert.
 - **Independent render resolution, from 20% to 200%.** Lower internal resolution can reduce rendering cost; higher settings allow supersampling. Output resolution and rendering scale are separate controls. Increasing scale does not replace the game's original texture artwork with new HD assets.
 - **Choose your frame-rate limit.** Use a predefined/custom cap, automatic capping based on the selected display, or an uncapped setting. V-Sync and an FPS counter are available separately. Actual performance depends on hardware, scene and enabled effects; capped screenshots are not benchmark results.

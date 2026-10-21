@@ -1,5 +1,19 @@
 # Public alpha validation
 
+## Ultrawide windowed test — 21 October 2026
+
+The isolated public source tree was built in Release with Clang 23.1.3. The standalone layout/projection/video geometry assertions passed, and an isolated installation loaded the new host EXE and game-code DLL through `--prepare-only` with developer environment variables removed.
+
+Tested host EXE SHA-256: `38c629493f020bf867c20e0e28599461ebc06da9442a6538841e3add9de6732d`.
+
+The maintainer then opened the isolated installation in a **1720×720 window on a 1920×1080 desktop**, approved the menus and combat, and supplied fighter-introduction and combat screenshots. This window has the same pixel aspect ratio as 3440×1440. The scene fills the wider window while the HUD stays inside the centred 16:9 area. Native introduction bars remain confined to that area; the maintainer accepted their appearance and reported no interference during combat.
+
+The inspected runtime session reports the supported XBE verified, `horizontal_scale=0.744186` for the scene camera, movie layout for a 1720×720 output, and normal shutdown (`Exit (0)`) after about 204 seconds. All 109,394 RunPushBuffer submissions were accepted. These counters do not prove every draw or resource is correct.
+
+No physical ultrawide fullscreen test, exhaustive video/campaign/arena coverage or full graphics regression is claimed. The user's approval applies to the reported windowed test. Original assets, prepared game-code DLLs, saves, raw logs and supplied screenshots are excluded from this source update.
+
+The new portable ZIP passed its allowlist/hash audit and the synthetic native-override/import/exception fixture. A fresh extraction compiled all 129 generated translation units and loaded its local DLL at 50.243 seconds, with `PATH` limited to Windows directories and developer include/library variables removed. The diagnostic exited with code 0 without starting gameplay. This is one preparation measurement on the same PC, not a timing guarantee. ZIP SHA-256: `313b33b1cfc413cf793e8d6746135ef1ea7ba3eba821f21ceade8d04d5224f09`.
+
 ## Separate DLL and portable compiler — 19–20 October 2026
 
 The first-launch compiler changes were compiled in a separate test workspace using the existing supported game data. Production saves were not copied into or used by the isolated package tests. The host EXE was about 4.7 MB; game instruction bodies were excluded from it and prepared into a separate local DLL.
