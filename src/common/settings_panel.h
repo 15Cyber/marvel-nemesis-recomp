@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,8 @@ struct MenuView {
 };
 bool NativeBegin(bool development = false);
 void NativeAction(MenuAction action);
+std::optional<MenuAction> TakeNativeSound(); // drain on the guest thread, outside UiLock
+unsigned TakeNativeMusicToggles(); // apply music gain on the guest thread
 MenuView NativeView();
 void NativeEnd();  // cancels an outstanding display preview, never saves implicitly
 }  // namespace game::settings_panel

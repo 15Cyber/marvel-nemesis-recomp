@@ -1,12 +1,18 @@
 # Public alpha validation
 
+## Portable candidate reviewed by a friend — 29 October 2026
+
+I sent the portable Windows ZIP to a friend for independent testing. He reported that it was good to release. His report did not include a detailed hardware list, build transcript or coverage matrix, so I do not claim those checks individually. The tested host EXE SHA-256 is `beed7e67bb5c7a3cd529e93b3c6d89871f0ce25ac1052dde0beb449531fbc156`. The ZIP I sent had SHA-256 `07976650ef7a11b58c26b299cc2601b865161781c73dca89fcc2e2f668c12c54`.
+
+The ZIP contains the prebuilt host EXE and portable first-launch tools. It does not contain the original Xbox game, a prepared game-code DLL, generated sources, saves or mods. The release packaging audit checked all manifest hashes and every archive entry. No Visual Studio installation is needed to play from this package; a developer source build has separate requirements.
+
 ## Ultrawide windowed test — 21 October 2026
 
 The isolated public source tree was built in Release with Clang 23.1.3. The standalone layout/projection/video geometry assertions passed, and an isolated installation loaded the new host EXE and game-code DLL through `--prepare-only` with developer environment variables removed.
 
 Tested host EXE SHA-256: `38c629493f020bf867c20e0e28599461ebc06da9442a6538841e3add9de6732d`.
 
-The maintainer then opened the isolated installation in a **1720×720 window on a 1920×1080 desktop**, approved the menus and combat, and supplied fighter-introduction and combat screenshots. This window has the same pixel aspect ratio as 3440×1440. The scene fills the wider window while the HUD stays inside the centred 16:9 area. Native introduction bars remain confined to that area; the maintainer accepted their appearance and reported no interference during combat.
+I then opened the isolated installation in a **1720×720 window on a 1920×1080 desktop**, checked the menus and combat, and supplied fighter-introduction and combat screenshots. This window has the same pixel aspect ratio as 3440×1440. The scene fills the wider window while the HUD stays inside the centred 16:9 area. Native introduction bars remain confined to that area; I accepted their appearance and found no interference with combat.
 
 The inspected runtime session reports the supported XBE verified, `horizontal_scale=0.744186` for the scene camera, movie layout for a 1720×720 output, and normal shutdown (`Exit (0)`) after about 204 seconds. All 109,394 RunPushBuffer submissions were accepted. These counters do not prove every draw or resource is correct.
 
@@ -36,7 +42,7 @@ This environment still has development software installed globally; the restrict
 
 ## Fresh-folder build — 19 October 2026
 
-The maintainer ran `build.bat` in the separately prepared public source folder using their own game files. Tested source revision: **`ebbc92e4085c31e453fa1b8100a0253d82083c90`**. This was a fresh source preparation with no old build/generated output copied by the preparation process; it used the same development PC, not an independent machine.
+I ran `build.bat` in the separately prepared public source folder using my own game files. Tested source revision: **`ebbc92e4085c31e453fa1b8100a0253d82083c90`**. This was a fresh source preparation with no old build/generated output copied by the preparation process; it used the same development PC, not an independent machine.
 
 Result: **build successful**. The supplied console output ends with `Linking CXX executable MarvelNemesis.exe`, the success message and the optional launch prompt. The generated executable is present. Ninja records code generation and compilation/linking; no compiler error, CMake error or stopped-build marker was found in the supplied output.
 

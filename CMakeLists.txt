@@ -2,6 +2,7 @@
 
 cmake_minimum_required(VERSION 3.25)
 project(game LANGUAGES C CXX)
+enable_language(RC)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,3 +31,6 @@ endif()
 
 # target name = GAME_EXE in build.bat, xbe = GAME_XBE
 add_xbe_image(MarvelNemesis default.xbe game.toml ${GAME_PARTITIONS} game)
+target_sources(MarvelNemesis PRIVATE resources/app.rc)
+target_include_directories(MarvelNemesis PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+set_property(SOURCE resources/app.rc APPEND PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/resources/app-icon.ico)

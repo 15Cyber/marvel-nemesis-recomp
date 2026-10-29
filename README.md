@@ -2,16 +2,14 @@
 
 Built with **[TGP482/XboxXBERecomp](https://github.com/TGP482/XboxXBERecomp)** — the original Xbox static recompilation toolkit that makes this port possible.
 
-**The original Xbox game, brought to Windows with modern graphics options, flexible controls and a native PC settings menu.**
+**I bring the original Xbox game to Windows with modern graphics options, flexible controls, Survival and native PC Settings.**
 
 Return to the campaign and local Versus with cleaner edges, configurable shadows, optional ambient occlusion and the freedom to choose your resolution and frame-rate limit. Explore developer-only scenes retained in the game data, remap your keyboard/controller, and experiment with compatible replacement resources through a portable mods folder.
 
 **Status: alpha · Windows x64 · Direct3D 12 · portable Windows package and source code.** This is an evolving community project, not a claim of complete compatibility. See [Validation](docs/VALIDATION.md) and [known limitations](docs/KNOWN_ISSUES.md) for the scope of testing.
 
-**AI-assisted development:** maintained by **15Cyber**, with assistance from **OpenAI Codex** and **Anthropic Claude** during research, implementation, debugging and documentation. Project direction, hands-on gameplay testing and approval of changes are handled by the maintainer.
-
-> **Bring your own game. We do not support piracy.**
-> You must provide files from your own legally acquired, supported original Xbox copy. No disc images, original game executables, prepared game-code DLLs, generated game sources or texture packs are supplied. The Windows package includes the host executable and compiler tools; your game's code is prepared locally from your own XBE. Do not request or share pirated copies, game-download links or copyrighted game resources in issues or pull requests. The images below are gameplay captures supplied by the maintainer for documentation, not usable game resources.
+> **Bring your own game. I do not support piracy.**
+> You must provide files from your own legally acquired, supported original Xbox copy. No disc images, original game executables, prepared game-code DLLs, generated game sources or texture packs are supplied. The Windows package includes the host executable and compiler tools; your game's code is prepared locally from your own XBE. Do not request or share pirated copies, game-download links or copyrighted game resources in issues or pull requests. I supplied the gameplay captures below for documentation; they are not usable game resources.
 
 ## See the port in action
 
@@ -46,13 +44,17 @@ Return to the campaign and local Versus with cleaner edges, configurable shadows
   </tr>
 </table>
 
-Before/after ordering was supplied by the maintainer. These are different moments in the same scene, not frame-matched captures; exact per-option settings have not been recorded for this pair. They illustrate the reported overall improvement, not an isolated effect test or a performance benchmark. [Full-size gallery and capture notes](docs/SHOWCASE.md).
+I identified the before/after order. These are different moments in the same scene, not frame-matched captures; exact per-option settings have not been recorded for this pair. They illustrate the reported overall improvement, not an isolated effect test or a performance benchmark. [Full-size gallery and capture notes](docs/SHOWCASE.md).
 
 ## Features
 
+### Survival
+
+Choose **SURVIVAL** from the main menu for Solo, local two-player Co-op or Co-op with a CPU ally. Play Classic's 20 waves or continue in Endless, choose a difficulty and arena, face bosses every five waves, and view local records. The main menu also has **QUIT GAME**. These are new PC-port features; network multiplayer is not included.
+
 ### Display and performance controls
 
-- **Ultrawide 21:9.** The main scene widens horizontally, HUD/menus keep a centred 16:9 canvas, and VP6 movies retain their proportions. The maintainer approved menus and combat in a 1720×720 window on a 16:9 desktop. See the [build and validation guide](docs/ULTRAWIDE.md) for coverage and remaining checks. The earlier alpha.2 package predates this change.
+- **Ultrawide 21:9.** The main scene widens horizontally, HUD/menus keep a centred 16:9 canvas, and VP6 movies retain their proportions. I checked menus and combat in a 1720×720 window on a 16:9 desktop. See the [build and validation guide](docs/ULTRAWIDE.md) for coverage and remaining checks.
 
 - **Choose your screen setup.** Fullscreen, borderless and windowed modes, monitor selection and available display resolutions let the port fit your desktop. Display changes use a confirmation timeout so an unusable selection can revert.
 - **Independent render resolution, from 20% to 200%.** Lower internal resolution can reduce rendering cost; higher settings allow supersampling. Output resolution and rendering scale are separate controls. Increasing scale does not replace the game's original texture artwork with new HD assets.
@@ -72,25 +74,25 @@ Before/after ordering was supplied by the maintainer. These are different moment
 | **Bloom** | Optional highlight glow with strength, threshold and radius controls. The current effect is deliberately subtle and can be disabled. It is not HDR or a replacement lighting engine. |
 | **Object distance: Original / 1.5x / 2x / 3x** | Extends identified distance-based visibility checks for scenery. Other engine limits still apply; this is not a universal model-detail/LOD replacement. Visual coverage and uncapped cost comparisons are still being expanded. |
 
-These options build on compatibility work for geometry submission, depth behavior, compressed textures and fog. The Daily Bugle black-scene defect was corrected and checked by the maintainer, alongside other rendering fixes. Alpha testing across more scenes and GPUs remains important.
+These options build on compatibility work for geometry submission, depth behavior, compressed textures and fog. I checked the Daily Bugle black-scene correction alongside other rendering fixes. Alpha testing across more scenes and GPUs remains important.
 
 ### PC Settings that belong in the game
 
 Open **Options → PC Settings** for an English menu using the game's own interface, or press **F10** for the alternate PC panel. Both use the same configuration: changing an option in one updates the other.
 
-Display, Graphics, Lighting and Shadows, Controls, Videos, Cheats and Development are grouped into navigable pages. Applied PC settings are written to `settings.toml` beside your executable. The original Options menu remains available.
+Display, Graphics, Lighting and Shadows, Controls, Videos, Cheats and Development are grouped into navigable pages. **MUSIC ON/OFF** is available here, not in the pause menu. Applied PC settings are written to `settings.toml` beside your executable. The original Options menu remains available.
 
 ### Keyboard and controller freedom
 
 - **Keyboard support with key remapping**, rather than replacing controller support.
-- **Keyboard and controller can coexist on player 1.** A second controller can independently drive player 2 in local Versus; this combination has been tested by the maintainer.
+- **Keyboard and controller can coexist on player 1.** A second controller can independently drive player 2 in local Versus; I tested this combination.
 - **Per-player device assignment and controller button remapping** let you choose how to play. The SDL-based input layer supports Xbox, PlayStation and Switch controllers, although not every model/hot-plug combination has been tested.
 
 ### Everyday quality-of-life improvements
 
 - **Pause on focus loss, including audio.** Switching away pauses the simulation/audio flow and resumes it on return when enabled.
 - **Optional intro-logo skipping** follows the native completion path. Movie framing includes the original treatment, aspect-preserving fit, a 4:3 frame and fill/crop; per-mode validation is still incomplete.
-- **Portable saves beside the executable.** Campaign data lives under `saves/E/UDATA/4541038a/`. Initial migration can copy old `hdd/E` data without deleting the original or overwriting populated saves. A fresh public build's save/close/reopen/load cycle has also been approved.
+- **Portable saves beside the executable.** Campaign data lives under `saves/E/UDATA/4541038a/`. Initial migration can copy old `hdd/E` data without deleting the original or overwriting populated saves. I tested a fresh public build's save/close/reopen/load cycle.
 - **Built-in optional cheats.** Separate player 1/player 2 health and energy modifiers, refill actions and content unlocks are accessible through PC Settings/F10. Session modifiers and normal-save unlock persistence are different behaviors; scripted deaths, ring-outs and objective failures are not all prevented.
 
 ### Developer-only content, brought back into reach
@@ -109,9 +111,9 @@ These are experimental developer scenes, not finished bonus campaign levels. Act
 
 The port creates a **`mods/` folder beside the executable**. Compatible replacement files mirror their paths inside the game data and override matching reads, with fallback to originals when no replacement exists. Restart after adding or removing a mod; recompilation is not needed for a compatible resource replacement.
 
-**What has already worked:** a community GameCube/Dolphin Spider-Man color texture supplied by the maintainer was manually adapted to native Xbox DDS/XPR resources. It loaded through the mods folder and was visually approved during gameplay in a tested arena. The community mod is not distributed with this project.
+**What has already worked:** I supplied a community GameCube/Dolphin Spider-Man color texture for manual adaptation to native Xbox DDS/XPR resources. It loaded through the mods folder, and I checked it during gameplay in a tested arena. The community mod is not distributed with this project.
 
-**What we have learned:**
+**What I learned:**
 
 - Some textures come from **XPR bundles** registered before loose DDS files, so a loose texture replacement alone may not be enough.
 - Color, alpha/material masks and normal maps have separate roles. Changing a suit's colors can leave original relief/reflections visible; a full visual adaptation may need matching maps.
@@ -145,15 +147,15 @@ Keep the bundled `sdk/`, which contains local compatibility fixes. Do not run SD
 
 ## Where the project may go next
 
-The focus is a dependable PC port and broader community testing. Possible future investigations include **additional gameplay modes**, **expanded character-slot support**, **network multiplayer options**, and better tools/documentation for creators.
+My focus is a dependable PC port and broader community testing. Possible future investigations include **additional gameplay modes**, **expanded character-slot support**, **network multiplayer options**, and better tools/documentation for creators.
 
-These are exploratory directions, not announced features, deadlines or guarantees. They are not available in the current alpha. Local two-player Versus already works; additional network functionality would be a separate undertaking. No details about unproven or unfinished content are being promised.
+These are exploratory directions, not announced features, deadlines or guarantees. Local Versus and Survival Co-op already work; network functionality would be a separate undertaking. I am not promising unproven or unfinished content.
 
 ## Validation, feedback and community testing
 
-Development testing has been performed on one Windows/NVIDIA system. The public candidate passed a fresh-folder build, reported gameplay smoke checks and manual save/reopen/load. Thing, Wolverine and Elektra campaign missions were visited through Development, without a claim of full campaign completion. Other characters/arenas and local multiplayer have also been exercised, but coverage is incomplete.
+I developed and tested on a Windows/NVIDIA system. A friend tested the portable candidate and approved it for release; I have no detailed hardware matrix or build log from that test. Earlier fresh-folder builds, gameplay checks and save/reopen/load are documented in [Validation](docs/VALIDATION.md). Thing, Wolverine and Elektra campaign missions were visited through Development, without a claim of full campaign completion. Other characters/arenas and local multiplayer have also been exercised, but coverage is incomplete.
 
-AMD/Intel GPUs, other PCs and additional campaign paths need testing. Vulkan, HDR and new multiplayer/co-op modes are not implemented. Read [known limitations](docs/KNOWN_ISSUES.md), then report reproducible defects using the issue template and [reporting guide](CONTRIBUTING.md).
+AMD/Intel GPUs and additional campaign paths need testing. Vulkan, HDR and network multiplayer are not implemented. Read [known limitations](docs/KNOWN_ISSUES.md), then report reproducible defects using the issue template and [reporting guide](CONTRIBUTING.md).
 
 Include hardware, source revision, settings, reproduction steps and a sanitized log. **Do not attach game files, disc images, executable/PDB, generated code, saves, memory dumps, bundles or texture packs.**
 
@@ -164,3 +166,5 @@ This project would not be possible without **TGP482's [XboxXBERecomp](https://gi
 Project-owned additions are licensed under [MIT](LICENSE). Third-party files retain their existing notices/licenses. Gameplay screenshots illustrate the port; game artwork and trademarks remain the property of their respective rights holders and are not granted by this software license.
 
 This is an unofficial fan project, not affiliated with, endorsed by or sponsored by Marvel, Electronic Arts, Microsoft or the original developers. No commercial affiliation or ownership of the original game is claimed.
+
+I am **15Cyber**, the owner and developer of this project. I set its direction, test the game and decide what to release. I work with **OpenAI Codex** and **Anthropic Claude** as AI partners for research, implementation, debugging and documentation.

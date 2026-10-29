@@ -28,4 +28,4 @@ A second PC without development tools installed and a full hands-on gameplay/sav
 
 [Building](BUILDING.md) remains available for developers. [Known issues](KNOWN_ISSUES.md) and [Usage](USAGE.md) describe current limits. Do not attach game files, prepared DLLs, `compiler/work/`, saves or memory dumps to reports.
 
-[Watch the showcase video](https://youtu.be/LgDM9how-TY). Maintained by 15Cyber with Codex/Claude assistance. Unofficial fan project; no affiliation with Marvel, EA, Microsoft or the original developers.
+[Watch the showcase video](https://youtu.be/LgDM9how-TY). I am 15Cyber; I developed this with OpenAI Codex and Anthropic Claude AI assistance. Unofficial fan project; no affiliation with Marvel, EA, Microsoft or the original developers.

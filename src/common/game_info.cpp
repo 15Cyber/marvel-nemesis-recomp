@@ -3,6 +3,7 @@
 #include "common/pc_controls.h"
 #include "common/pc_video.h"
 #include "common/pc_render.h"
+#include "common/desktop_menu.h"
 
 // what the runtime asks of the game; strings must be set, hooks may stay null
 const app::GameInfo app::kGame = {
@@ -28,7 +29,10 @@ const app::GameInfo app::kGame = {
     .init = game::settings_panel::Initialize,  // after the settings load, before the window and boot
     .loaded = nullptr,  // image in memory, before its entry point runs
     .window = game::settings_panel::WindowReady,  // the game window is up
-    .message = game::settings_panel::Message,  // window messages first; true takes one
+    .message = [](void* hwnd, uint32_t msg, uintptr_t wp, intptr_t lp, intptr_t* result) {  // window messages first; true takes one
+        return game::desktop_menu::Message(hwnd, msg, wp, lp, result) ||
+               game::settings_panel::Message(hwnd, msg, wp, lp, result);
+    },
     .ui = game::settings_panel::Draw,  // ImGui drawing each frame
     .pad = game::settings_panel::FilterPad,  // changes a polled pad
     .rumble = game::settings_panel::FilterRumble,  // changes a rumble before it is set

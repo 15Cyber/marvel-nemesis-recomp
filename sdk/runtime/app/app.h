@@ -23,6 +23,7 @@ struct Settings {
     uint32_t fps_cap = 60;           // 0 unlimited
     bool vsync = true;
     bool pause_on_focus_loss = true;  // hold simulation, sound and guest clocks in the background
+    bool music_enabled = true;
     uint32_t aniso = 0;              // 0 as the game asks
     std::string monitor;            // empty follows the primary monitor, else a Windows device name
     uint32_t msaa = 0;              // 0 off, 2/4/8 samples on screen-sized targets

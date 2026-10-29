@@ -1,5 +1,6 @@
 // Retail default.xbe only. Keep actor access on the guest thread; UI sends requests.
 #include "common/pc_cheats.h"
+#include "common/pc_survival.h"
 #include "core/log.h"
 #include "xdk/hle.h"
 #include <array>
@@ -121,11 +122,13 @@ X86_FUNC(sub_00030510) {
     // Keep the native control flow and x87 result; substitute zero before death is decided.
     const int p = game::pc_cheats::Active() ? Slot(ctx.ecx) : -1;
     const uint32_t argument = ctx.esp + 0x10;
-    if (game::pc_cheats::Enabled(p, false) && Alive(ctx.ecx) &&
+    const bool cheat = game::pc_cheats::Enabled(p, false);
+    const bool friendly = game::pc_survival::FriendlyDamage(ctx, ctx.ecx, kernel::R32(ctx.esp + 4));
+    if ((cheat || friendly || game::pc_survival::Protected(ctx.ecx)) && Alive(ctx.ecx) &&
         std::isfinite(kernel::G<float>(argument)) && kernel::G<float>(argument) > 0) {
         const uint32_t saved = kernel::R32(argument);
         kernel::W32(argument, 0);
-        ++g_damage[p];
+        if (cheat) ++g_damage[p];
         __imp__sub_00030510(ctx, base);
         kernel::W32(argument, saved);
     } else __imp__sub_00030510(ctx, base);

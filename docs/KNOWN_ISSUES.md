@@ -2,7 +2,7 @@
 
 ## Confirmed coverage
 
-- Public source candidate compiled successfully in a fresh folder on the maintainer's PC on 19 October 2026. The user subsequently approved the tested gameplay and a manual save/close/reopen/load cycle. Logs confirm normal shutdown in both supplied runtime sessions. See [Validation](VALIDATION.md).
+- I compiled the public source candidate in a fresh folder on 19 October 2026, then checked gameplay and a manual save/close/reopen/load cycle. Logs confirm normal shutdown in both supplied runtime sessions. See [Validation](VALIDATION.md).
 
 - Development testing on one Windows 11 system with an NVIDIA RTX 5060 Ti, Ryzen 5 5600 and 32 GB RAM.
 - Original and PC menus, multiple Versus arenas/characters, local two-player input, keyboard remapping/coexistence, graphics options and focus pause exercised by the tester.
@@ -13,12 +13,12 @@
 
 ## Pending checks
 
-- Ultrawide 21:9 passed a local Release build, geometry checks and DLL loading; the maintainer approved menus and combat in a 1720×720 window on 21 October 2026. Physical ultrawide fullscreen, exhaustive edge visibility, movies/campaign scenes and graphics combinations still need broader testing. Native fighter-introduction black bars remain within the centred 16:9 area; this was accepted in the windowed test. The earlier alpha.2 package predates this feature. See [Ultrawide](ULTRAWIDE.md).
+- Ultrawide 21:9 passed a local Release build, geometry checks and DLL loading; I checked menus and combat in a 1720×720 window on 21 October 2026. Physical ultrawide fullscreen, exhaustive edge visibility, movies/campaign scenes and graphics combinations still need broader testing. Native fighter-introduction black bars remain within the centred 16:9 area; I accepted this in the windowed test. The earlier alpha.2 package predates this feature. See [Ultrawide](ULTRAWIDE.md).
 
-- The portable first-launch flow was checked with developer paths/include/library variables removed on the existing PC. A second Windows machine without development tools installed remains untested.
+- The portable first-launch flow was checked with developer paths/include/library variables removed on my PC. A friend tested the 29 October portable candidate and approved it for release; I have not received a detailed hardware/build log from that test.
 - The new EXE/DLL layout has automated preparation, recovery, synthetic ABI and native boot smoke coverage. The earlier hands-on gameplay/save checks below predate this layout; a full gameplay/save regression of the new package is still welcome.
 
-- Build and gameplay on a second PC; broader coverage beyond the maintainer's smoke checks.
+- Broader second-PC coverage and a documented source build outside my development PC.
 - AMD/Intel GPUs, Windows 10, broader campaign and device hot-plug coverage.
 - Autosave restoration after normal campaign Load/reset following a Development session. The public fresh-folder save test did not establish this separate behavior.
 - Mods applied over an ISO and additional resource/campaign bundle paths.

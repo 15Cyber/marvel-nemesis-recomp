@@ -21,7 +21,7 @@ Supported `default.xbe` SHA-1: **`66481feb81d9a00a63f0d2f0a203a297b712cfb5`**. O
 
 ## Alpha coverage and limitations
 
-The maintainer validated a fresh-folder build, gameplay smoke checks and manual save/close/reopen/load on one Windows/NVIDIA PC. Campaign and hardware coverage remain incomplete; AMD/Intel GPUs and other PCs need community testing. Rendering currently uses Direct3D 12. Vulkan, HDR, additional character slots and new network/co-op modes are not implemented.
+I validated a fresh-folder build, gameplay smoke checks and manual save/close/reopen/load on one Windows/NVIDIA PC. Campaign and hardware coverage remain incomplete; AMD/Intel GPUs and other PCs need community testing. Rendering currently uses Direct3D 12. Vulkan, HDR, additional character slots and new network/co-op modes are not implemented.
 
 Developer scenes can contain unfinished behavior. Development sessions do not roll back progress in memory, and manual saves remain possible: preserve your normal campaign save before exploration. Mods require compatible Xbox paths/formats and remain subject to guest-memory limits.
 
@@ -31,4 +31,4 @@ See [Known issues](KNOWN_ISSUES.md), [Validation](VALIDATION.md) and [Usage](USA
 
 [Watch menus and gameplay on YouTube](https://youtu.be/LgDM9how-TY).
 
-Maintained by **15Cyber**, with AI assistance from **OpenAI Codex** and **Anthropic Claude**. Project-owned additions use MIT; existing third-party notices are preserved. This is an unofficial fan project, not affiliated with Marvel, Electronic Arts, Microsoft or the original developers.
+I am **15Cyber** and developed this with **OpenAI Codex** and **Anthropic Claude** AI assistance. Project-owned additions use MIT; existing third-party notices are preserved. This is an unofficial fan project, not affiliated with Marvel, Electronic Arts, Microsoft or the original developers.

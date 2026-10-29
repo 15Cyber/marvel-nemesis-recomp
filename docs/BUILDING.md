@@ -12,7 +12,7 @@ These instructions are for developers. Players can use the portable Windows ZIP 
 
 Recorded development environment, read from existing build metadata/file versions: **Visual Studio 18.11.12306.390**, **standalone LLVM/Clang 23.1.3**, **CMake 4.3.1-msvc1**. These are the observed versions, not proven minimums. Ninja's exact version and clean-build duration have not been recorded. Visual Studio's bundled Clang is also installed, but `build.bat` prefers a standalone installation when present.
 
-The build uses both standalone Clang and Visual Studio's LLVM utilities. On 19 October 2026, the maintainer successfully compiled the public candidate in its fresh folder with Clang 23.1.3, CMake 4.3.1-msvc1 and Windows SDK 10.0.26100.0. This validates that local build path; it does not establish a second-machine result. See [Validation](VALIDATION.md).
+The build uses both standalone Clang and Visual Studio's LLVM utilities. On 19 October 2026, I successfully compiled the public candidate in its fresh folder with Clang 23.1.3, CMake 4.3.1-msvc1 and Windows SDK 10.0.26100.0. This validates that local build path; it does not establish a second-machine result. See [Validation](VALIDATION.md).
 
 ## 1. Prepare the source
 

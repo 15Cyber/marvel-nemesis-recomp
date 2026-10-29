@@ -14,13 +14,13 @@
 ## Before publication
 
 - [x] Public identity configured locally as `15Cyber`, using the GitHub-provided noreply address.
-- [x] Maintainer selects the MIT pattern used by the Splinter Cell reference and SDK for project-owned additions; existing notices preserved.
+- [x] I selected the MIT pattern used by the Splinter Cell reference and SDK for project-owned additions; existing notices preserved.
 - [x] Fresh local Git history uses the public noreply identity; source inventory and author/committer metadata inspected.
 - [x] User built this candidate in its fresh folder with their own game data; tool versions and success recorded in VALIDATION.md. Total build time remains unmeasured; only the Ninja interval is available.
 - [x] User approved the tested gameplay and manual save/close/reopen/load cycle in this clean build; runtime logs confirm initialization and normal shutdown. Individual coverage limits are in VALIDATION.md.
 - [x] No defect reported in this smoke round; broader unresolved cases remain visible in KNOWN_ISSUES.md.
 - [x] Source inventory and source archive checked after documentation updates; private archives are never release packages. Repeat this check if sources change again.
-- [x] Maintainer explicitly authorized publishing sources and the portable host/compiler package to `15Cyber/marvel-nemesis-recomp`.
+- [x] I authorized publishing sources and the portable host/compiler package to `15Cyber/marvel-nemesis-recomp`.
 
 ## Portable Windows package
 

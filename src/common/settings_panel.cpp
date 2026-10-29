@@ -29,6 +29,7 @@
 #include "common/pc_render.h"
 #include "common/pc_cheats.h"
 #include "common/pc_development.h"
+#include "common/pc_survival.h"
 #include "core/input.h"
 #include "core/log.h"
 #include "gpu/smaa.h"
@@ -93,7 +94,15 @@ pc_cheats::Unlock g_unlock_choice = pc_cheats::Unlock::None;
 bool g_development = false;
 uint32_t g_native_controller = 0;
 std::optional<pc_development::Destination> g_destination;
+unsigned g_survival_players = 1, g_survival_players_before = 1;
+pc_survival::Party g_survival_characters = pc_survival::DefaultParty, g_survival_characters_before = pc_survival::DefaultParty;
+unsigned g_survival_lives = 3, g_survival_lives_before = 3;
+unsigned g_survival_start_wave = 1, g_survival_start_wave_before = 1;
+unsigned g_survival_difficulty = 0, g_survival_difficulty_before = 0;
+unsigned g_survival_format = 0, g_survival_format_before = 0;
 std::atomic<bool> g_native{false};
+std::optional<MenuAction> g_native_sound;
+unsigned g_native_music_toggles = 0;
 Page g_page = Page::Home;
 int g_selected = 0;
 bool g_editing = false, g_waiting_key = false;
@@ -593,6 +602,7 @@ void EndNative() {
     pc_controls::ClearKeys();
     g_draft = Current();
     g_native = false;
+    g_native_music_toggles = 0;
     g_development = false;
     g_destination.reset();
     g_editing = g_waiting_key = false;
@@ -642,6 +652,9 @@ std::vector<NativeRow> NativeRows() {
         page("LIGHTING AND SHADOWS", Page::Lighting);
         page("CONTROLS", Page::Controls);
         page("VIDEOS", Page::Videos);
+        rows.push_back({"MUSIC", app::Get().music_enabled ? "ON" : "OFF",
+                        [](int) { ++g_native_music_toggles; g_editing = false; },
+                        [] { ++g_native_music_toggles; }});
         page("CHEATS", Page::Cheats);
         if (g_development) page("DEVELOPMENT", Page::Development);
         action("APPLY AND SAVE", [] { Apply(); if (g_confirm) g_selected = 0; });
@@ -816,6 +829,11 @@ std::vector<NativeRow> NativeRows() {
                     return;
                 }
                 g_destination = destination;
+                g_survival_players = 1;
+                g_survival_characters = pc_survival::DefaultParty;
+                g_survival_lives = 3;
+                g_survival_start_wave = 1;
+                g_survival_difficulty = g_survival_format = 0;
                 g_status.clear();
                 Go(Page::ConfirmLevel);
             }});
@@ -826,13 +844,29 @@ std::vector<NativeRow> NativeRows() {
     case Page::ConfirmLevel:
         action("CANCEL", [] { g_destination.reset(); Parent(); });
         if (g_destination) {
+            if (pc_development::IsSurvival(g_destination->kind)) {
+                choice("PLAYERS", g_survival_players, {1, 2}, {"1", "2"});
+                choice("FORMAT (TEST)", g_survival_format, {0, 1}, {"CLASSIC", "ENDLESS"});
+                choice("DIFFICULTY (TEST)", g_survival_difficulty, {0, 1, 2}, {"STANDARD", "HARD", "EXTREME"});
+                std::vector<uint32_t> characters;
+                std::vector<std::string> character_names;
+                for (unsigned i = 0; i < pc_survival::Characters.size(); ++i) {
+                    characters.push_back(i); character_names.emplace_back(pc_survival::Characters[i].label);
+                }
+                choice("P1 CHARACTER", g_survival_characters[0], characters, character_names);
+                if (g_survival_players == 2) choice("P2 CHARACTER", g_survival_characters[1], characters, character_names);
+                choice("STARTING LIVES", g_survival_lives, {1, 3, 5}, {"1", "3", "5"});
+                choice("STARTING WAVE (TEST)", g_survival_start_wave, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+                       {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"});
+            }
             rows.push_back({"LOAD " + g_destination->name, "", {}, [] {
                 if (!g_development || !g_destination) return;
                 if (!(g_draft == Current())) {
                     g_status = "APPLY OR DISCARD SETTINGS BEFORE LOADING";
                     return;
                 }
-                if (pc_development::Request(*g_destination, g_native_controller)) EndNative();
+                if (pc_development::Request(*g_destination, g_native_controller, g_survival_lives, g_survival_start_wave, g_survival_players, g_survival_characters,
+                                            g_survival_difficulty, g_survival_format != 0)) EndNative();
                 else g_status = pc_development::Status();
             }});
         }
@@ -884,6 +918,8 @@ bool NativeBegin(bool development) {
     pc_controls::CancelCapture();
     input::StopRumble();
     g_native = true;
+    g_native_sound.reset();
+    g_native_music_toggles = 0;
     g_nav_ready = false;
     g_native_held = 0;
     g_native_repeat.fill(0);
@@ -895,6 +931,17 @@ bool NativeBegin(bool development) {
 void NativeEnd() {
     std::lock_guard lock(app::UiLock());
     if (g_native) EndNative();
+    g_native_sound.reset();
+}
+
+std::optional<MenuAction> TakeNativeSound() {
+    std::lock_guard lock(app::UiLock());
+    return std::exchange(g_native_sound, std::nullopt);
+}
+
+unsigned TakeNativeMusicToggles() {
+    std::lock_guard lock(app::UiLock());
+    return std::exchange(g_native_music_toggles, 0u);
 }
 
 void NativeAction(MenuAction action) {
@@ -909,15 +956,21 @@ void NativeAction(MenuAction action) {
         for (auto& release : g_release) release = true;
     }
     if (pc_controls::Capturing()) {
-        if (action == MenuAction::Back) { pc_controls::CancelCapture(); g_editing = g_waiting_key = false; }
+        if (action == MenuAction::Back) { pc_controls::CancelCapture(); g_editing = g_waiting_key = false; g_native_sound = action; }
         return;
     }
     if (action == MenuAction::Back) {
         if (g_confirm) { Revert("Previous settings restored."); g_selected = 0; }
-        else if (g_editing) { g_draft = g_edit_before; g_editing = g_waiting_key = false; RefreshModes(); }
+        else if (g_editing) { g_draft = g_edit_before; g_survival_players = g_survival_players_before;
+            g_survival_characters = g_survival_characters_before;
+            g_survival_lives = g_survival_lives_before;
+            g_survival_start_wave = g_survival_start_wave_before;
+            g_survival_difficulty = g_survival_difficulty_before; g_survival_format = g_survival_format_before;
+            g_editing = g_waiting_key = false; RefreshModes(); }
         else if (g_page == Page::Home) {
             if (g_draft == Current()) EndNative(); else Go(Page::Leave);
         } else Parent();
+        g_native_sound = action;
         return;
     }
     auto rows = NativeRows();
@@ -925,15 +978,29 @@ void NativeAction(MenuAction action) {
     g_selected = std::clamp(g_selected, 0, int(rows.size()) - 1);
     auto& row = rows[size_t(g_selected)];
     if (action == MenuAction::Up || action == MenuAction::Down) {
-        if (!g_editing) g_selected = (g_selected + (action == MenuAction::Up ? -1 : 1) + int(rows.size())) % int(rows.size());
+        if (!g_editing && rows.size() > 1) {
+            g_selected = (g_selected + (action == MenuAction::Up ? -1 : 1) + int(rows.size())) % int(rows.size());
+            g_native_sound = action;
+        }
     } else if (action == MenuAction::Select) {
+        if (g_editing || row.enter || row.change) g_native_sound = action;
         if (g_editing) { g_editing = false; g_status.clear(); }
         else if (row.enter) row.enter();
-        else if (row.change) { g_edit_before = g_draft; g_editing = true; g_status.clear(); }
+        else if (row.change) { g_edit_before = g_draft; g_survival_players_before = g_survival_players;
+            g_survival_characters_before = g_survival_characters;
+            g_survival_lives_before = g_survival_lives;
+            g_survival_start_wave_before = g_survival_start_wave;
+            g_survival_difficulty_before = g_survival_difficulty; g_survival_format_before = g_survival_format;
+            g_editing = true; g_status.clear(); }
     } else if (row.change) {
-        if (!g_editing) { g_edit_before = g_draft; g_editing = true; }
+        if (!g_editing) { g_edit_before = g_draft; g_survival_players_before = g_survival_players;
+            g_survival_characters_before = g_survival_characters;
+            g_survival_lives_before = g_survival_lives;
+            g_survival_start_wave_before = g_survival_start_wave;
+            g_survival_difficulty_before = g_survival_difficulty; g_survival_format_before = g_survival_format; g_editing = true; }
         g_status.clear();
         row.change(action == MenuAction::Left ? -1 : 1);
+        g_native_sound = action;
         // Keep a route into P1 even if its pad is disabled in the draft.
         if (g_draft.input.controller[0] == 4 && g_draft.input.keyboard_player != 1)
             g_draft.input.keyboard_player = 1;
@@ -1243,6 +1310,7 @@ void Draw(double fps) {
     const auto output_info = ActiveOutput();
     ReportDisplay(fps, output_info);
     if (FpsCounter()) Counter(fps);
+    pc_survival::Draw();
     if (!g_open.load()) return;
     if (g_confirm && GetTickCount64() >= g_deadline) Revert("Time expired. Previous settings restored.");
     if (GetTickCount64() >= g_next_displays && !g_confirm) {
@@ -1279,6 +1347,7 @@ void Draw(double fps) {
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings)) {
         ImGui::TextUnformatted("DISPLAY, GRAPHICS AND CONTROLS");
         ImGui::TextWrapped("Use mouse, keyboard or controller. B / Esc / F10: close. Pause gameplay before making changes.");
+        if (pc_survival::DrawControls()) Close();
         if (fps > 0 && std::isfinite(fps)) ImGui::Text("Current performance: %.1f FPS", fps);
         ImGui::Separator();
         const float footer = ImGui::GetFrameHeightWithSpacing() * 2 + ImGui::GetTextLineHeightWithSpacing() * 3;

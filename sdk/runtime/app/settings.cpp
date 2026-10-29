@@ -63,6 +63,7 @@ void Load() {
     s.fps_cap = t["fps_cap"].value_or(s.fps_cap);
     s.vsync = t["vsync"].value_or(s.vsync);
     s.pause_on_focus_loss = t["pause_on_focus_loss"].value_or(s.pause_on_focus_loss);
+    s.music_enabled = t["music_enabled"].value_or(s.music_enabled);
     s.aniso = t["anisotropic_filtering"].value_or(s.aniso);
     s.monitor = t["monitor"].value_or(s.monitor);
     s.fps_auto = t["fps_auto"].value_or(s.fps_auto);
@@ -95,6 +96,7 @@ toml::table Table() {
                   {"fps_cap", int64_t(s.fps_cap)},
                   {"vsync", s.vsync},
                   {"pause_on_focus_loss", s.pause_on_focus_loss},
+                  {"music_enabled", s.music_enabled},
                   {"anisotropic_filtering", int64_t(s.aniso)},
                   {"monitor", s.monitor},
                   {"fps_auto", s.fps_auto},

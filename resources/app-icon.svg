@@ -1,0 +1,21 @@
+<!-- Original project artwork, MIT License; no game artwork or official logos. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <polygon points="8,28 28,8 228,8 248,28 248,228 228,248 28,248 8,228" fill="#233e3f"/>
+  <polygon points="12,30 30,12 226,12 244,30 244,226 226,244 30,244 12,226" fill="#080f13"/>
+  <polygon points="16,32 32,16 128,16 128,20 34,20 20,34 20,128 16,128" fill="#314a3d"/>
+  <polygon points="236,128 240,128 240,224 224,240 128,240 128,236 222,236 236,222" fill="#193641"/>
+  <polygon points="49,209 49,59 84,59 133,122 182,59 217,59 217,209 174,209 174,128 133,177 92,128 92,209" fill="#020709"/>
+  <polygon points="44,203 44,53 79,53 128,116 128,171 87,122 87,203" fill="#71936b"/>
+  <polygon points="128,116 177,53 212,53 212,203 169,203 169,122 128,171" fill="#4c7885"/>
+  <polygon points="44,53 79,53 128,116 128,130 74,63 44,63" fill="#afc19e"/>
+  <polygon points="128,116 177,53 212,53 212,63 182,63 128,130" fill="#83a8ac"/>
+  <polygon points="44,63 54,63 54,193 44,203" fill="#3a5845"/>
+  <polygon points="77,110 87,122 87,203 77,193" fill="#345441"/>
+  <polygon points="202,63 212,63 212,203 202,193" fill="#254958"/>
+  <polygon points="169,122 179,110 179,193 169,203" fill="#6b9098"/>
+  <polygon points="87,110 128,155 169,110 169,122 128,171 87,122" fill="#294e4f"/>
+  <polygon points="44,203 87,203 77,193 54,193" fill="#223d30"/>
+  <polygon points="169,203 212,203 202,193 179,193" fill="#183542"/>
+  <rect x="56" y="147" width="14" height="2" rx="0" fill="#527452"/>
+  <rect x="185" y="91" width="15" height="2" rx="0" fill="#355c6a"/>
+</svg>

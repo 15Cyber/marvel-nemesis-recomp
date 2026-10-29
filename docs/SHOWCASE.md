@@ -1,6 +1,6 @@
 # Screenshots, video and comparisons
 
-These screenshots were captured by the maintainer and supplied for documenting the PC port. They are gameplay/menu captures, not extracted textures, models or other usable game resources. Original imagery remains the property of its respective rights holders; the software MIT license does not grant rights to that artwork.
+I captured these screenshots to document the PC port. They are gameplay/menu captures, not extracted textures, models or other usable game resources. Original imagery remains the property of its respective rights holders; the software MIT license does not grant rights to that artwork.
 
 ## Gameplay
 
@@ -18,11 +18,11 @@ These screenshots were captured by the maintainer and supplied for documenting t
 
 ## Graphics comparisons
 
-The maintainer identified the 11:48:34 capture as **before**; the companion 11:46:51 capture is presented as **after** in the supplied pair. Both files are copied without edits. This is not labeled as original-console footage versus PC: the capture origin and per-option settings have not been established as a console comparison.
+I identified the 11:48:34 capture as **before**; the companion 11:46:51 capture is presented as **after** in the supplied pair. Both files are copied without edits. This is not labeled as original-console footage versus PC: the capture origin and per-option settings have not been established as a console comparison.
 
 ### Before — baseline capture
 
-![Thing in the maintainer-identified before capture](screenshots/graphics-before.png)
+![Thing in the capture I identified as before](screenshots/graphics-before.png)
 
 ### After — enhanced capture
 

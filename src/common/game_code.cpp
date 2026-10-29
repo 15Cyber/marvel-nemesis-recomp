@@ -85,6 +85,13 @@ HWND g_window = nullptr;
 
 
 constexpr UINT kBuildDone = WM_APP + 1;
+HFONT g_prepare_font = nullptr;
+void PrepareFont(HWND window) {
+    if (g_prepare_font) DeleteObject(g_prepare_font);
+    g_prepare_font = CreateFontW(-MulDiv(9, int(GetDpiForWindow(window)), 72), 0, 0, 0,
+        FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
+}
 
 int64_t NowMs() {
     using namespace std::chrono;
@@ -443,6 +450,20 @@ const wchar_t* StageText() {
 
 LRESULT CALLBACK PrepareWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
+        case WM_CREATE: PrepareFont(hwnd); return 0;
+        case WM_DPICHANGED: {
+            PrepareFont(hwnd);
+            const auto* suggested = reinterpret_cast<const RECT*>(lp);
+            SetWindowPos(hwnd, nullptr, suggested->left, suggested->top,
+                suggested->right - suggested->left, suggested->bottom - suggested->top,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+            InvalidateRect(hwnd, nullptr, TRUE);
+            return 0;
+        }
+        case WM_DESTROY:
+            if (g_prepare_font) DeleteObject(g_prepare_font);
+            g_prepare_font = nullptr;
+            return 0;
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC dc = BeginPaint(hwnd, &ps);
@@ -451,20 +472,21 @@ LRESULT CALLBACK PrepareWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             FillRect(dc, &area, GetSysColorBrush(COLOR_WINDOW));
             SetBkMode(dc, TRANSPARENT);
             SetTextColor(dc, GetSysColor(COLOR_WINDOWTEXT));
-            auto old_font = SelectObject(dc, GetStockObject(DEFAULT_GUI_FONT));
-            RECT heading{20, 15, area.right - 20, 45};
+            auto old_font = SelectObject(dc, g_prepare_font ? reinterpret_cast<HGDIOBJ>(g_prepare_font) : GetStockObject(DEFAULT_GUI_FONT));
+            const auto pixel = [dpi = GetDpiForWindow(hwnd)](int value) { return MulDiv(value, int(dpi), 96); };
+            RECT heading{pixel(20), pixel(15), area.right - pixel(20), pixel(45)};
             DrawTextW(dc, L"Preparing Marvel Nemesis for this PC", -1, &heading, DT_SINGLELINE | DT_VCENTER);
-            RECT stage{20, 50, area.right - 20, 80};
+            RECT stage{pixel(20), pixel(50), area.right - pixel(20), pixel(80)};
             DrawTextW(dc, StageText(), -1, &stage, DT_SINGLELINE | DT_VCENTER);
             float fraction = 0;
             if (g_progress.stage == Stage::Compiling && g_progress.bytes_total)
                 fraction = float(g_progress.bytes_done) / float(g_progress.bytes_total);
             if (g_progress.stage == Stage::Linking || g_progress.stage == Stage::Ready) fraction = 1;
-            RECT track{20, 85, area.right - 20, 100};
+            RECT track{pixel(20), pixel(85), area.right - pixel(20), pixel(100)};
             FillRect(dc, &track, GetSysColorBrush(COLOR_BTNFACE));
             track.right = track.left + LONG(float(track.right - track.left) * fraction);
             FillRect(dc, &track, GetSysColorBrush(COLOR_HIGHLIGHT));
-            RECT detail{20, 110, area.right - 20, 150};
+            RECT detail{pixel(20), pixel(110), area.right - pixel(20), pixel(160)};
             std::wstring text = L"First launch may take several minutes. No Visual Studio installation is needed.";
             if (g_progress.stage == Stage::Compiling)
                 text = L"Files completed: " + std::to_wstring(g_progress.files_done) + L" / " +
@@ -505,9 +527,10 @@ bool BuildWithWindow(std::vector<Target>& targets, bool prepare_only) {
     wc.hCursor = LoadCursorW(nullptr, MAKEINTRESOURCEW(32512));
     wc.lpszClassName = L"MarvelNemesisGameCode";
     RegisterClassExW(&wc);
-    RECT area{0, 0, 600, 170};
+    const auto dpi = GetDpiForSystem();
+    RECT area{0, 0, MulDiv(600, int(dpi), 96), MulDiv(180, int(dpi), 96)};
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-    AdjustWindowRectEx(&area, style, FALSE, 0);
+    AdjustWindowRectExForDpi(&area, style, FALSE, 0, dpi);
     g_window = CreateWindowExW(0, wc.lpszClassName, kTitle, style | WS_VISIBLE,
         CW_USEDEFAULT, CW_USEDEFAULT, area.right - area.left, area.bottom - area.top,
         nullptr, nullptr, wc.hInstance, nullptr);

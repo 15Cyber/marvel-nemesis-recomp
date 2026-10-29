@@ -29,6 +29,7 @@ Do not attach game files, prepared DLLs, compiler/work, saves or memory dumps.
 
 Project: https://github.com/15Cyber/marvel-nemesis-recomp
 Built with TGP482/XboxXBERecomp; first-launch preparation adapted from
-TGP482/SCDA-XBERecomp (MIT). Maintained by 15Cyber with Codex/Claude assistance.
+TGP482/SCDA-XBERecomp (MIT). I am 15Cyber, the project owner. I develop it
+with assistance from OpenAI Codex and Anthropic Claude AI tools.
 Unofficial fan project, not affiliated with Marvel, EA, Microsoft or original developers.
 See LICENSE, NOTICE, sdk/THIRD_PARTY.txt and docs/licenses for software notices.

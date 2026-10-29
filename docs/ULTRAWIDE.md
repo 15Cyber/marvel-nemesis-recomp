@@ -1,8 +1,8 @@
 # Ultrawide 21:9
 
-Support for [issue #1](https://github.com/15Cyber/marvel-nemesis-recomp/issues/1). **The local Release build and geometry checks passed, and the maintainer approved menus and combat in a 1720×720 window on 21 October 2026.** The earlier alpha.2 Windows package predates this change.
+Support for [issue #1](https://github.com/15Cyber/marvel-nemesis-recomp/issues/1). **The local Release build and geometry checks passed, and I checked menus and combat in a 1720×720 window on 21 October 2026.** The earlier alpha.2 Windows package predates this change.
 
-The test used a 16:9 desktop; 1720×720 has exactly the same aspect ratio as 3440×1440. Supplied screenshots show the scene across the full window and HUD elements inside the centred 16:9 area. The native black bars during the fighter introduction remain inside that same area, leaving the sides visible; the maintainer accepted this behaviour and reported that the bars do not interfere with combat. Fullscreen on a physical ultrawide monitor and exhaustive movie/campaign/effect coverage remain untested. See [Validation](VALIDATION.md).
+The test used a 16:9 desktop; 1720×720 has exactly the same aspect ratio as 3440×1440. Supplied screenshots show the scene across the full window and HUD elements inside the centred 16:9 area. The native black bars during the fighter introduction remain inside that same area, leaving the sides visible; I accepted this behaviour and found no interference with combat. Fullscreen on a physical ultrawide monitor and exhaustive movie/campaign/effect coverage remain untested. See [Validation](VALIDATION.md).
 
 ## Intended behaviour
 

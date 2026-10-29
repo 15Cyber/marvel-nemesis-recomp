@@ -2,6 +2,7 @@
 // Preserve the native mission/level load paths; never jump into the loader
 // while the APT PC Settings page still owns its retained text clips.
 #include "common/pc_development.h"
+#include "common/pc_survival.h"
 #include "core/log.h"
 #include "kernel/disc.h"
 #include "xdk/hle.h"
@@ -20,13 +21,24 @@ constexpr uint32_t kLevelName = 0x4F40CC, kSceneName = 0x4F40EC;
 constexpr uint32_t kDirectLevel = 0x4F414C, kNamedScene = 0x4F4150, kNextState = 0x4C343C;
 constexpr uint32_t kMemcard = 0x5155E8;
 std::atomic<int32_t> g_return_controller{-1};
+std::optional<pc_survival::ReplaySettings> g_survival_replay;
 uint8_t g_autosave_backup = 0; // Native Options backup, captured once per session.
-struct TestLevel { const char* name; const char* level; };
+struct TestLevel {
+    const char* name;
+    const char* level;
+    const char* scene = nullptr;
+    Kind kind = Kind::TestLevel;
+};
 constexpr std::array<TestLevel, 3> kTests{{
     {"COMBAT TEST", "0_Test_Clash"},
     {"CHARACTER TEST", "characterTest"},
     {"EMPTY TEST ARENA", "0_Test_Arena"},
 }};
+// Preserve the existing Mansion test index; append the other native Versus arenas.
+constexpr std::array<unsigned, 7> kSurvivalVenues{2, 0, 1, 3, 4, 5, 6};
+constexpr auto kTestCount = kTests.size() + kSurvivalVenues.size();
+// Keep the diagnostic launcher available for restoration; Survival now uses its main menu.
+constexpr bool kShowSurvivalTests = false;
 
 bool Address(uint32_t p, uint32_t size) {
     if (p < 0x10000 || !size || uint64_t(p) + size > 0x100000000ull) return false;
@@ -138,8 +150,14 @@ std::optional<Destination> Mission(uint32_t index) {
     return destination;
 }
 Destination Test(uint32_t index) {
-    const auto& test = kTests[index];
-    Destination destination{Kind::TestLevel, index, test.name, test.level, test.level};
+    Destination destination;
+    if (index < kTests.size()) {
+        const auto& test = kTests[index];
+        destination = {test.kind, index, test.name, test.level, test.scene ? test.scene : test.level};
+    } else {
+        const auto& arena = pc_survival::Arenas[kSurvivalVenues[index - kTests.size()]];
+        destination = {Kind::Survival, index, arena.option, arena.level, arena.scene};
+    }
     destination.available = Resources(destination);
     if (destination.available) {
         destination.unavailable_reason = TestWorldProblem(destination.level);
@@ -157,7 +175,8 @@ Catalog Collect(bool frontend) {
     if (count > 0 && count <= 100)
         for (uint32_t i = 0; i < count; ++i)
             if (auto mission = Mission(i)) catalog.missions.push_back(std::move(*mission));
-    for (uint32_t i = 0; i < kTests.size(); ++i) catalog.tests.push_back(Test(i));
+    for (uint32_t i = 0; i < (kShowSurvivalTests ? kTestCount : kTests.size()); ++i)
+        catalog.tests.push_back(Test(i));
     return catalog;
 }
 void CopyName(uint32_t address, const std::string& name) {
@@ -166,7 +185,21 @@ void CopyName(uint32_t address, const std::string& name) {
 }
 }
 
-void Tick(X86Context& ctx, bool frontend, bool can_launch) {
+void QueueSurvivalReplay(pc_survival::ReplaySettings settings) { g_survival_replay = settings; }
+void Tick(X86Context& ctx, bool frontend, bool can_launch, bool replay_ready) {
+    if (g_survival_replay && replay_ready && pc_survival::ReadView().phase == pc_survival::Phase::Off &&
+        !kernel::R32(0x4C33F0) && !kernel::R32(0x4C33E4) && kernel::R32(0x4C3444) == 2 &&
+        kernel::R32(kNextState) != 7) {
+        const auto settings = *g_survival_replay;
+        g_survival_replay.reset();
+        std::string error;
+        if (!LaunchSurvival(ctx, settings.characters, settings.costumes, settings.lives, settings.controllers,
+                            settings.cooperative, settings.venue, error, settings.start_wave, settings.ai_partner, settings.difficulty, settings.endless)) {
+            Complete("REPLAY CANCELLED: " + error);
+            LOGR("survival-results: replay rejected: %s", error.c_str());
+        } else LOGR("survival-results: replay launched start_wave=%u", settings.start_wave);
+        return;
+    }
     static auto next = std::chrono::steady_clock::time_point{};
     static bool previous_frontend = false;
     const auto now = std::chrono::steady_clock::now();
@@ -187,11 +220,11 @@ void Tick(X86Context& ctx, bool frontend, bool can_launch) {
     }
     const auto& destination = request->destination;
     const auto current = destination.kind == Kind::Mission ? Mission(destination.index) :
-        destination.index < kTests.size() ? std::optional<Destination>(Test(destination.index)) : std::nullopt;
-    if (request->controller > 1 || !current || *current != destination || !Resources(*current, true)) {
+        destination.index < kTestCount ? std::optional<Destination>(Test(destination.index)) : std::nullopt;
+    if (request->controller > 1 || (request->players != 1 && request->players != 2) || !current || *current != destination || !Resources(*current, true)) {
         Complete("LOAD CANCELLED; LEVEL OR SCENE UNAVAILABLE"); return;
     }
-    if (current->kind == Kind::TestLevel) {
+    if (current->kind != Kind::Mission) {
         const auto problem = TestWorldProblem(current->level, true);
         if (!problem.empty()) { Complete("LOAD CANCELLED; " + problem); return; }
     }
@@ -211,6 +244,12 @@ void Tick(X86Context& ctx, bool frontend, bool can_launch) {
          unsigned(current->kind), current->index, current->level.c_str(), current->scene.c_str(), kernel::R32(0x4F40C0),
          request->controller, int32_t(kernel::R32(0x515CFC)));
     const X86Context saved = ctx;
+    if (IsSurvival(current->kind)) {
+        std::string error;
+        if (!pc_survival::Prepare(ctx, request->initial_lives, error, request->start_wave,
+                                 request->players == 2, request->characters,
+                                 kSurvivalVenues[current->index - kTests.size()], request->difficulty, request->endless)) { Complete(error); return; }
+    }
     // Arm only after all launch checks, before any mission setup can request
     // an autosave. Keep this policy across Quit/results/mission selection:
     // that RAM still contains test progress until a real save is loaded.
@@ -224,6 +263,8 @@ void Tick(X86Context& ctx, bool frontend, bool can_launch) {
     // so seed this cache and mapping using the native Control_BindController.
     g_return_controller.store(int32_t(request->controller), std::memory_order_relaxed);
     kernel::CallGuest(ctx, 0xE3490, {request->controller, 0});
+    if (IsSurvival(current->kind) && request->players == 2)
+        kernel::CallGuest(ctx, 0xE3490, {1u - request->controller, 1});
     if (current->kind == Kind::Mission) {
         kernel::W32(kDirectLevel, 0);
         kernel::W32(kNamedScene, 0);
@@ -245,10 +286,54 @@ void Tick(X86Context& ctx, bool frontend, bool can_launch) {
     Complete("LOAD REQUESTED; DEVELOPMENT AUTOSAVE DISABLED");
     Publish(Catalog{});
 }
+bool LaunchSurvival(X86Context& ctx, std::array<unsigned, 2> characters,
+                    std::array<unsigned, 2> costumes, std::array<unsigned, 2> lives,
+                    std::array<unsigned, 2> controllers, bool cooperative, unsigned venue, std::string& error, unsigned start_wave, bool ai_partner,
+                    unsigned difficulty, bool endless) {
+    if (!pc_survival::AllowedDifficulty(difficulty)) { error = "SURVIVAL DIFFICULTY INVALID"; return false; }
+    if (ai_partner && !cooperative) { error = "SURVIVAL AI PARTNER REQUIRES TWO PARTICIPANTS"; return false; }
+    const auto* arena = pc_survival::ArenaFor(venue);
+    if (!arena) { error = "SURVIVAL ARENA SELECTION INVALID"; return false; }
+    const Destination destination{Kind::Survival, venue, arena->option, arena->level, arena->scene};
+    if (!Resources(destination, true)) {
+        error = "SURVIVAL ARENA RESOURCES UNAVAILABLE"; return false;
+    }
+    const auto problem = TestWorldProblem(destination.level, true);
+    if (!problem.empty()) { error = problem; return false; }
+    const auto card = Memcard();
+    if (!card || kernel::G<uint8_t>(card + 0x6E7) ||
+        controllers[0] > 1 || (cooperative && !ai_partner && (controllers[1] > 1 || controllers[0] == controllers[1]))) {
+        error = "CHECK CONTROLLERS AND WAIT FOR STORAGE"; return false;
+    }
+    if (ai_partner) controllers[1] = 1u - controllers[0]; // Reserved port; the CPU never reads a second controller.
+    const X86Context saved = ctx;
+    if (!pc_survival::PrepareNative(ctx, characters, costumes, lives, cooperative, venue, error, start_wave, ai_partner, difficulty, endless)) {
+        ctx = saved; return false;
+    }
+    if (!AutosaveBlocked()) g_autosave_backup = kernel::G<uint8_t>(card + 0x705);
+    ClearAutosaveRequests(ctx, card);
+    SetAutosaveBlocked(true);
+    g_return_controller.store(int32_t(controllers[0]), std::memory_order_relaxed);
+    kernel::CallGuest(ctx, 0xE3490, {controllers[0], 0});
+    if (cooperative && !ai_partner) kernel::CallGuest(ctx, 0xE3490, {controllers[1], 1});
+    else if (ai_partner) kernel::CallGuest(ctx, 0x10ACE0, {0xFFFFFFFFu, 1}); // CPU is not a required physical controller.
+    CopyName(kLevelName, destination.level);
+    CopyName(kSceneName, destination.scene);
+    kernel::W32(kNamedScene, 1);
+    kernel::CallGuest(ctx, 0x10AC70, {0});
+    kernel::W32(kDirectLevel, 1);
+    kernel::W32(kNextState, 7);
+    LOGR("survival-menu: launch players=%u chars=%u/%u costumes=%u/%u lives=%u/%u controllers=%u/%u venue=%u arena=%s scene=%s",
+         cooperative ? 2u : 1u, characters[0], characters[1], costumes[0], costumes[1],
+         lives[0], lives[1], controllers[0], controllers[1], venue, arena->level, arena->scene);
+    ctx = saved;
+    return true;
+}
 static int32_t ReturnMenuController() {
     return g_return_controller.load(std::memory_order_relaxed);
 }
 static void EndTestSession(X86Context& ctx, const char* reason) {
+    g_survival_replay.reset();
     if (!AutosaveBlocked()) return;
     if (const auto card = Memcard()) {
         ClearAutosaveRequests(ctx, card);
